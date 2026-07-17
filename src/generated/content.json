@@ -1,0 +1,393 @@
+{
+  "generatedAt": "2026-07-17T08:01:18.047Z",
+  "settings": {
+    "featuredArticles": [
+      {
+        "_id": "42a73094-f3e7-4d38-89cc-7f45d6a7943d",
+        "author": {
+          "_id": "f12b2f56-2d02-4347-b2e3-fc06cbbf6299",
+          "biography": "Will Dyson is The Performance Consultant. His work combines doctoral training in molecular and structural biology with postgraduate study in performance nutrition and applied coaching practice.",
+          "image": {
+            "alt": "Will Dyson",
+            "aspectRatio": 0.6665865384615385,
+            "caption": null,
+            "credit": null,
+            "crop": null,
+            "height": 4160,
+            "hotspot": null,
+            "url": "https://cdn.sanity.io/images/stkjtr6l/production/eefb28215cf4752bb39a593308494ee002ebc885-2773x4160.jpg",
+            "width": 2773
+          },
+          "name": "Will Dyson",
+          "role": "Performance and Nutrition Consultant",
+          "slug": "will-dyson"
+        },
+        "categories": [
+          {
+            "_id": "2d60615d-966a-4372-8352-7276c9883060",
+            "description": "Performance and lifestyle nutrition related articles",
+            "slug": "nutrition",
+            "title": "Nutrition"
+          }
+        ],
+        "coverImage": {
+          "alt": "Will Dyson explaining a performance nutrition concept at a desk.",
+          "aspectRatio": 0.5625,
+          "caption": null,
+          "credit": null,
+          "crop": null,
+          "height": 3840,
+          "hotspot": null,
+          "url": "https://cdn.sanity.io/images/stkjtr6l/production/87c9f8d439dac00f58668cba51a8d5fbda4b5ba9-2160x3840.png",
+          "width": 2160
+        },
+        "estimatedReadingTime": 2,
+        "excerpt": "A practical, evidence-based framework for setting daily protein intake and distributing it across meals without making nutrition unnecessarily complicated.",
+        "publishedAt": "2026-07-17T07:48:45.953Z",
+        "slug": "protein-distribution-strength-hypertrophy",
+        "tags": [],
+        "title": "Protein Distribution: What Matters for Strength and Hypertrophy",
+        "updatedAt": null
+      }
+    ],
+    "mastheadEyebrow": "Performance & nutrition journal",
+    "mastheadIntroduction": "Detailed analysis for athletes who train seriously and want their programming, nutrition and recovery decisions grounded in evidence and interpreted in context.",
+    "mastheadTitle": "Evidence, applied.",
+    "seo": {
+      "_type": "seo",
+      "metaDescription": "Evidence-based articles on performance training, nutrition, recovery and practical decision-making for everyday athletes.",
+      "metaTitle": "Performance and Nutrition Articles",
+      "noIndex": false,
+      "socialImage": null
+    }
+  },
+  "articles": [
+    {
+      "_id": "42a73094-f3e7-4d38-89cc-7f45d6a7943d",
+      "author": {
+        "_id": "f12b2f56-2d02-4347-b2e3-fc06cbbf6299",
+        "biography": "Will Dyson is The Performance Consultant. His work combines doctoral training in molecular and structural biology with postgraduate study in performance nutrition and applied coaching practice.",
+        "image": {
+          "alt": "Will Dyson",
+          "aspectRatio": 0.6665865384615385,
+          "caption": null,
+          "credit": null,
+          "crop": null,
+          "height": 4160,
+          "hotspot": null,
+          "url": "https://cdn.sanity.io/images/stkjtr6l/production/eefb28215cf4752bb39a593308494ee002ebc885-2773x4160.jpg",
+          "width": 2773
+        },
+        "name": "Will Dyson",
+        "role": "Performance and Nutrition Consultant",
+        "slug": "will-dyson"
+      },
+      "body": [
+        {
+          "_key": "opening",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "opening-span",
+              "_type": "span",
+              "marks": [],
+              "text": "Protein timing receives a disproportionate amount of attention. For most trained people, the first priority is still the amount of high-quality protein consumed across the full day. Distribution becomes useful after that daily target is consistently met."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "daily-target-heading",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "daily-target-heading-span",
+              "_type": "span",
+              "marks": [],
+              "text": "Start with the daily target"
+            }
+          ],
+          "markDefs": [],
+          "style": "h2"
+        },
+        {
+          "_key": "daily-target-copy",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "daily-target-copy-span",
+              "_type": "span",
+              "marks": [],
+              "text": "A large meta-analysis found that gains in fat-free mass during resistance training were not meaningfully improved beyond an average intake of approximately 1.6 g of protein per kilogram of body mass per day. This is a population estimate, not a rigid ceiling. Energy restriction, very high training volumes, food preference and individual tolerance can justify a higher target."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "daily-target-callout",
+          "_type": "evidenceCallout",
+          "body": [
+            {
+              "_key": "daily-target-callout-copy",
+              "_type": "block",
+              "children": [
+                {
+                  "_key": "daily-target-callout-copy-span",
+                  "_type": "span",
+                  "marks": [],
+                  "text": "For an 80 kg athlete, 1.6 g/kg provides 128 g of protein per day. Establishing that intake consistently is likely to matter more than whether one meal contains 30 g or 35 g."
+                }
+              ],
+              "markDefs": [],
+              "style": "normal"
+            }
+          ],
+          "heading": "Set the day before optimising each meal",
+          "label": "Practical starting point",
+          "markDefs": null,
+          "tone": "practical"
+        },
+        {
+          "_key": "distribution-heading",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "distribution-heading-span",
+              "_type": "span",
+              "marks": [],
+              "text": "Then distribute it deliberately"
+            }
+          ],
+          "markDefs": [],
+          "style": "h2"
+        },
+        {
+          "_key": "distribution-copy",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "distribution-copy-span",
+              "_type": "span",
+              "marks": [],
+              "text": "Once the daily total is secure, dividing protein across three to five meals is a sensible approach. A practical target is approximately 0.3 to 0.5 g/kg per meal. Four meals at 0.4 g/kg would provide 1.6 g/kg across the day while giving each meal enough protein to stimulate muscle protein synthesis in most adults."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "distribution-table",
+          "_type": "table",
+          "caption": "Example protein distribution using four meals at approximately 0.4 g/kg per meal.",
+          "hasHeaderRow": true,
+          "markDefs": null,
+          "rows": [
+            {
+              "_key": "row-header",
+              "_type": "tableRow",
+              "cells": [
+                "Body mass",
+                "Per meal",
+                "Four-meal total"
+              ]
+            },
+            {
+              "_key": "row-60",
+              "_type": "tableRow",
+              "cells": [
+                "60 kg",
+                "24 g",
+                "96 g"
+              ]
+            },
+            {
+              "_key": "row-80",
+              "_type": "tableRow",
+              "cells": [
+                "80 kg",
+                "32 g",
+                "128 g"
+              ]
+            },
+            {
+              "_key": "row-100",
+              "_type": "tableRow",
+              "cells": [
+                "100 kg",
+                "40 g",
+                "160 g"
+              ]
+            }
+          ]
+        },
+        {
+          "_key": "training-heading",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "training-heading-span",
+              "_type": "span",
+              "marks": [],
+              "text": "The meal around training is part of the day"
+            }
+          ],
+          "markDefs": [],
+          "style": "h2"
+        },
+        {
+          "_key": "training-copy",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "training-copy-span",
+              "_type": "span",
+              "marks": [],
+              "text": "Resistance exercise increases the muscle response to protein for many hours. There is no need to treat the post-training period as a narrow emergency window. A protein-containing meal within a few hours before or after training is generally sufficient, provided the wider daily intake is appropriate."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "priority-quote",
+          "_type": "pullQuote",
+          "attribution": "The Performance Consultant",
+          "markDefs": null,
+          "quote": "Protein distribution should make the daily target easier to achieve, not make eating more complicated."
+        },
+        {
+          "_key": "application-heading",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "application-heading-span",
+              "_type": "span",
+              "marks": [],
+              "text": "How to apply this without overengineering it"
+            }
+          ],
+          "markDefs": [],
+          "style": "h2"
+        },
+        {
+          "_key": "application-copy-one",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "application-copy-one-span",
+              "_type": "span",
+              "marks": [],
+              "text": "Choose a daily target that fits the training phase. Divide it between the number of meals you can repeat reliably. Anchor each meal with a recognisable protein source, then adjust portions using training performance, appetite, gastrointestinal comfort and body-composition progress."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "application-copy-two",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "application-copy-two-span",
+              "_type": "span",
+              "marks": [],
+              "text": "A plan is only useful when it survives work, family meals and changes to the training week. The objective is a repeatable structure with enough flexibility to remain accurate when real life changes."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "references",
+          "_type": "references",
+          "entries": [
+            {
+              "_key": "morton-2018",
+              "_type": "referenceEntry",
+              "authors": "Morton RW, Murphy KT, McKellar SR, et al.",
+              "doi": "10.1136/bjsports-2017-097608",
+              "issue": "6",
+              "pages": "376-384",
+              "publication": "British Journal of Sports Medicine",
+              "title": "A systematic review, meta-analysis and meta-regression of the effect of protein supplementation on resistance training-induced gains in muscle mass and strength in healthy adults",
+              "url": "https://doi.org/10.1136/bjsports-2017-097608",
+              "volume": "52",
+              "year": 2018
+            },
+            {
+              "_key": "schoenfeld-aragon-2018",
+              "_type": "referenceEntry",
+              "authors": "Schoenfeld BJ, Aragon AA.",
+              "doi": "10.1186/s12970-018-0215-1",
+              "pages": "10",
+              "publication": "Journal of the International Society of Sports Nutrition",
+              "title": "How much protein can the body use in a single meal for muscle-building? Implications for daily protein distribution",
+              "url": "https://doi.org/10.1186/s12970-018-0215-1",
+              "volume": "15",
+              "year": 2018
+            },
+            {
+              "_key": "jager-2017",
+              "_type": "referenceEntry",
+              "authors": "Jäger R, Kerksick CM, Campbell BI, et al.",
+              "doi": "10.1186/s12970-017-0177-8",
+              "pages": "20",
+              "publication": "Journal of the International Society of Sports Nutrition",
+              "title": "International Society of Sports Nutrition position stand: protein and exercise",
+              "url": "https://doi.org/10.1186/s12970-017-0177-8",
+              "volume": "14",
+              "year": 2017
+            }
+          ],
+          "heading": "References",
+          "markDefs": null
+        }
+      ],
+      "categories": [
+        {
+          "_id": "2d60615d-966a-4372-8352-7276c9883060",
+          "description": "Performance and lifestyle nutrition related articles",
+          "slug": "nutrition",
+          "title": "Nutrition"
+        }
+      ],
+      "coverImage": {
+        "alt": "Will Dyson explaining a performance nutrition concept at a desk.",
+        "aspectRatio": 0.5625,
+        "caption": null,
+        "credit": null,
+        "crop": null,
+        "height": 3840,
+        "hotspot": null,
+        "url": "https://cdn.sanity.io/images/stkjtr6l/production/87c9f8d439dac00f58668cba51a8d5fbda4b5ba9-2160x3840.png",
+        "width": 2160
+      },
+      "estimatedReadingTime": 2,
+      "excerpt": "A practical, evidence-based framework for setting daily protein intake and distributing it across meals without making nutrition unnecessarily complicated.",
+      "publishedAt": "2026-07-17T07:48:45.953Z",
+      "seo": {
+        "_type": "seo",
+        "metaDescription": "How to set and distribute daily protein intake for strength, hypertrophy and a training schedule that still fits real life.",
+        "metaTitle": "Protein Distribution for Strength and Hypertrophy",
+        "noIndex": false,
+        "socialImage": null
+      },
+      "slug": "protein-distribution-strength-hypertrophy",
+      "tags": [],
+      "title": "Protein Distribution: What Matters for Strength and Hypertrophy",
+      "updatedAt": null
+    }
+  ],
+  "categories": [
+    {
+      "_id": "2d60615d-966a-4372-8352-7276c9883060",
+      "articleCount": 1,
+      "description": "Performance and lifestyle nutrition related articles",
+      "slug": "nutrition",
+      "title": "Nutrition"
+    }
+  ],
+  "tags": []
+}
