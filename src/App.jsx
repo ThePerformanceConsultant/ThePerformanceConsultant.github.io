@@ -14,6 +14,7 @@ import { normaliseSlug } from './components/blog/blogUtils.js'
 import { Shell } from './Shell.jsx'
 import { updateMetadata } from './metadata.js'
 import { loadPublicationIndex, loadPublishedArticle } from './sanity.js'
+import HomeApp from './home/HomeApp.jsx'
 
 const PAGE_SIZE = 9
 
@@ -286,10 +287,6 @@ function Article({ slug, indexData }) {
 
 function Route({ data, location }) {
   const path = location.pathname.replace(/\/+$/, '') || '/'
-  if (path === '/') {
-    window.history.replaceState({}, '', '/blog')
-    return <JournalIndex data={data} search={location.search} />
-  }
   if (path === '/blog') return <JournalIndex data={data} search={location.search} />
 
   const category = path.match(/^\/blog\/category\/([^/]+)$/)
@@ -301,8 +298,7 @@ function Route({ data, location }) {
   return <MissingPage />
 }
 
-export default function App() {
-  const location = useLocation()
+function Publication({ location }) {
   const publication = usePublicationIndex()
 
   return (
@@ -312,4 +308,21 @@ export default function App() {
       {publication.status === 'ready' && <Route data={publication.data} location={location} />}
     </Shell>
   )
+}
+
+export default function App() {
+  const location = useLocation()
+  const path = location.pathname.replace(/\/+$/, '') || '/'
+
+  useEffect(() => {
+    if (path !== '/') return
+    updateMetadata({
+      title: 'Online Performance and Nutrition Coaching',
+      description: 'Evidence-led online performance and nutrition coaching for everyday athletes who train four to six times per week.',
+      path: '/',
+    })
+  }, [path])
+
+  if (path === '/') return <HomeApp />
+  return <Publication location={location} />
 }

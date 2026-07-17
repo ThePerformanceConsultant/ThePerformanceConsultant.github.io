@@ -40,6 +40,7 @@ export default defineConfig({
       'react-dom': path.resolve(directory, 'node_modules/react-dom'),
       'next/link': path.resolve(directory, 'src/compat/Link.jsx'),
       'next/image': path.resolve(directory, 'src/compat/Image.jsx'),
+      'next/navigation': path.resolve(directory, 'src/compat/navigation.jsx'),
     },
   },
   build: {

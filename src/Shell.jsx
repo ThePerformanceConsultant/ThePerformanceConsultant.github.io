@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-const MAIN_SITE = 'https://performance-consultant-studio.vercel.app'
+const MAIN_SITE = ''
 const navigation = [
   ['Method', `${MAIN_SITE}/#method`],
   ['Results', `${MAIN_SITE}/#results`],

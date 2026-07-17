@@ -1,12 +1,27 @@
 {
-  "generatedAt": "2026-07-17T08:01:18.047Z",
+  "generatedAt": "2026-07-17T15:35:39.404Z",
   "settings": {
     "featuredArticles": [
       {
         "_id": "42a73094-f3e7-4d38-89cc-7f45d6a7943d",
         "author": {
           "_id": "f12b2f56-2d02-4347-b2e3-fc06cbbf6299",
-          "biography": "Will Dyson is The Performance Consultant. His work combines doctoral training in molecular and structural biology with postgraduate study in performance nutrition and applied coaching practice.",
+          "biography": [
+            {
+              "_key": "author-biography",
+              "_type": "block",
+              "children": [
+                {
+                  "_key": "author-biography-span",
+                  "_type": "span",
+                  "marks": [],
+                  "text": "Will Dyson is The Performance Consultant. His work combines doctoral training in molecular and structural biology with postgraduate study in performance nutrition and applied coaching practice."
+                }
+              ],
+              "markDefs": [],
+              "style": "normal"
+            }
+          ],
           "image": {
             "alt": "Will Dyson",
             "aspectRatio": 0.6665865384615385,
@@ -43,7 +58,7 @@
         },
         "estimatedReadingTime": 2,
         "excerpt": "A practical, evidence-based framework for setting daily protein intake and distributing it across meals without making nutrition unnecessarily complicated.",
-        "publishedAt": "2026-07-17T07:48:45.953Z",
+        "publishedAt": "2026-07-17T08:18:29.305Z",
         "slug": "protein-distribution-strength-hypertrophy",
         "tags": [],
         "title": "Protein Distribution: What Matters for Strength and Hypertrophy",
@@ -66,7 +81,22 @@
       "_id": "42a73094-f3e7-4d38-89cc-7f45d6a7943d",
       "author": {
         "_id": "f12b2f56-2d02-4347-b2e3-fc06cbbf6299",
-        "biography": "Will Dyson is The Performance Consultant. His work combines doctoral training in molecular and structural biology with postgraduate study in performance nutrition and applied coaching practice.",
+        "biography": [
+          {
+            "_key": "author-biography",
+            "_type": "block",
+            "children": [
+              {
+                "_key": "author-biography-span",
+                "_type": "span",
+                "marks": [],
+                "text": "Will Dyson is The Performance Consultant. His work combines doctoral training in molecular and structural biology with postgraduate study in performance nutrition and applied coaching practice."
+              }
+            ],
+            "markDefs": [],
+            "style": "normal"
+          }
+        ],
         "image": {
           "alt": "Will Dyson",
           "aspectRatio": 0.6665865384615385,
@@ -366,7 +396,7 @@
       },
       "estimatedReadingTime": 2,
       "excerpt": "A practical, evidence-based framework for setting daily protein intake and distributing it across meals without making nutrition unnecessarily complicated.",
-      "publishedAt": "2026-07-17T07:48:45.953Z",
+      "publishedAt": "2026-07-17T08:18:29.305Z",
       "seo": {
         "_type": "seo",
         "metaDescription": "How to set and distribute daily protein intake for strength, hypertrophy and a training schedule that still fits real life.",
