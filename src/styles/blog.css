@@ -1670,6 +1670,14 @@
     margin-left: calc(var(--gutter) * -0.45);
   }
 
+  .journal-pullquote::before {
+    top: 32px;
+  }
+
+  .journal-pullquote blockquote {
+    text-indent: 0.72em;
+  }
+
   .journal-article-hero__media figcaption,
   .journal-media figcaption,
   .journal-video figcaption,
