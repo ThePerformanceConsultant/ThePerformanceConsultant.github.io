@@ -1099,6 +1099,21 @@
   font-size: 0.78em;
 }
 
+.journal-rich__drop-cap {
+  display: flow-root;
+}
+
+.journal-rich__drop-cap::first-letter {
+  float: left;
+  margin: 0.08em 0.12em 0 0;
+  color: #a1845f;
+  font-family: var(--font-emphasis);
+  font-size: 5.1em;
+  font-style: italic;
+  font-weight: 300;
+  line-height: 0.74;
+}
+
 .journal-rich strong { font-weight: 800; }
 .journal-rich em { font-family: var(--font-emphasis); font-size: 1.08em; }
 .journal-rich u { text-decoration-color: var(--gold); text-decoration-thickness: 2px; text-underline-offset: 3px; }
@@ -1676,6 +1691,11 @@
 
   .journal-pullquote blockquote {
     text-indent: 0.72em;
+  }
+
+  .journal-rich__drop-cap::first-letter {
+    margin-top: 0.1em;
+    font-size: 4.5em;
   }
 
   .journal-article-hero__media figcaption,

@@ -234,6 +234,11 @@ function createPortableTextComponents(headingIds) {
   components = {
     block: {
       normal: ({ children }) => <p>{children}</p>,
+      dropCap: ({ children, value }) => (
+        <p className={plainTextFromBlock(value).trim() ? 'journal-rich__drop-cap' : undefined}>
+          {children}
+        </p>
+      ),
       h2: heading('h2'),
       h3: heading('h3'),
       h4: heading('h4'),
