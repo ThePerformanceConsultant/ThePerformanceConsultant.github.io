@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-17T15:35:39.404Z",
+  "generatedAt": "2026-07-19T12:14:36.233Z",
   "settings": {
     "featuredArticles": [
       {
@@ -62,7 +62,7 @@
         "slug": "protein-distribution-strength-hypertrophy",
         "tags": [],
         "title": "Protein Distribution: What Matters for Strength and Hypertrophy",
-        "updatedAt": null
+        "updatedAt": "2026-07-17T08:18:29Z"
       }
     ],
     "mastheadEyebrow": "Performance & nutrition journal",
@@ -77,6 +77,1769 @@
     }
   },
   "articles": [
+    {
+      "_id": "2de36a42-f344-4619-8df1-41db7f121a2f",
+      "author": {
+        "_id": "f12b2f56-2d02-4347-b2e3-fc06cbbf6299",
+        "biography": [
+          {
+            "_key": "author-biography",
+            "_type": "block",
+            "children": [
+              {
+                "_key": "author-biography-span",
+                "_type": "span",
+                "marks": [],
+                "text": "Will Dyson is The Performance Consultant. His work combines doctoral training in molecular and structural biology with postgraduate study in performance nutrition and applied coaching practice."
+              }
+            ],
+            "markDefs": [],
+            "style": "normal"
+          }
+        ],
+        "image": {
+          "alt": "Will Dyson",
+          "aspectRatio": 0.6665865384615385,
+          "caption": null,
+          "credit": null,
+          "crop": null,
+          "height": 4160,
+          "hotspot": null,
+          "url": "https://cdn.sanity.io/images/stkjtr6l/production/eefb28215cf4752bb39a593308494ee002ebc885-2773x4160.jpg",
+          "width": 2773
+        },
+        "name": "Will Dyson",
+        "role": "Performance and Nutrition Consultant",
+        "slug": "will-dyson"
+      },
+      "body": [
+        {
+          "_key": "4dabd3049126",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "1721d21e3af9",
+              "_type": "span",
+              "marks": [
+                "strong"
+              ],
+              "text": "Sweetness as a culinary tool"
+            }
+          ],
+          "markDefs": [],
+          "style": "h2"
+        },
+        {
+          "_key": "7e334f43a727",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "3e368f569876",
+              "_type": "span",
+              "marks": [],
+              "text": "Sweetness carries an unusual amount of moral baggage in fitness culture."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "b31e2471c1be",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "67f70cae59fb",
+              "_type": "span",
+              "marks": [],
+              "text": "Sweet foods are often associated with rewards, \"cheat meals\", weakness or evidence of poor discipline, making it difficult to use sweetness "
+            },
+            {
+              "_key": "bdc2bea2a62f",
+              "_type": "span",
+              "marks": [
+                "em"
+              ],
+              "text": "intelligently"
+            },
+            {
+              "_key": "b63a1b29cef4",
+              "_type": "span",
+              "marks": [],
+              "text": ". People either remove it completely or consume it reactively after several days of trying not to think about it which, if you're a client of mine, will know is the complete opposite of what we want to do if we like a food or flavour."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "2ee63d37295f",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "7622ecce3ef1",
+              "_type": "span",
+              "marks": [],
+              "text": "Sweetness is simply one component of flavour. It can make fruit, yogurt and oats more satisfying. It can soften the acidity of tomatoes, balance the bitterness of cocoa and moderate an aggressive chilli sauce. Used carefully, it can improve a savoury recipe without making the finished meal taste conventionally sweet."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "9e44ea6455b3",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "0ae4e9ed0927",
+              "_type": "span",
+              "marks": [
+                "strong"
+              ],
+              "text": "What creates sweet taste?"
+            }
+          ],
+          "markDefs": [],
+          "style": "h2"
+        },
+        {
+          "_key": "9860d970a7b2",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "8442ba57eaf9",
+              "_type": "span",
+              "marks": [],
+              "text": "Human sweet taste is principally associated with the T1R2/T1R3 receptor complex, which responds to sugars and a range of other sweet-tasting compounds. Sweetness is therefore associated with carbohydrate and energy, but it is "
+            },
+            {
+              "_key": "54e75e25db08",
+              "_type": "span",
+              "marks": [
+                "em"
+              ],
+              "text": "not"
+            },
+            {
+              "_key": "464cae8c86b9",
+              "_type": "span",
+              "marks": [],
+              "text": " a direct or quantifiable measurement of either. For instance, starches such as rice, oats, bread and potatoes provide carbohydrate without tasting intensely sweet, while berries and non-nutritive sweeteners provide sweetness with little or no energy."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "c572ddf26dea",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "4b28d0740fa8",
+              "_type": "span",
+              "marks": [],
+              "text": "This is important for athletes. Despite the cacophony of self-proclaimed social media \"experts\" proclaiming that your cravings are directly linked to nutritional deficiencies, a craving for sweet food cannot tell you "
+            },
+            {
+              "_key": "8a8b2b57bd97",
+              "_type": "span",
+              "marks": [
+                "em"
+              ],
+              "text": "how much"
+            },
+            {
+              "_key": "55af94fb91aa",
+              "_type": "span",
+              "marks": [],
+              "text": " "
+            },
+            {
+              "_key": "38238e5227f0",
+              "_type": "span",
+              "marks": [
+                "strong"
+              ],
+              "text": "glycogen"
+            },
+            {
+              "_key": "f44c5db96046",
+              "_type": "span",
+              "marks": [],
+              "text": " is present in your muscle; nor is a sweet-tasting food an automatically effective recovery meal. Conversely, the presence of "
+            },
+            {
+              "_key": "10b3ab7e85f4",
+              "_type": "span",
+              "marks": [
+                "strong"
+              ],
+              "text": "sugar"
+            },
+            {
+              "_key": "10b4ec067ea5",
+              "_type": "span",
+              "marks": [],
+              "text": " does not make a food nutritionally inappropriate. "
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "7fca0c946ab3",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "1159c3111c1b",
+              "_type": "span",
+              "marks": [],
+              "text": "A brief rant on the \"evils\" of sugar... It pains me to no end to say that last week I waited 5 minutes to grab my protein yogurts from Aldi because two people were deliberating whether or not the 3-4 grams of sugar per 100 g in a protein yogurt was worth it for what is an excellent food choice. I'm confident that, given there were other much higher calorie, sugar-containing and more obesigenic ingredients in their trolley that their reasons were not medical (i.e. diabetes), and while I have no doubt that they are health-conscious and well-intentioned; it was poignant reminder of just how far social media has (wrongly) influenced our behaviours. Without going too off piste, just because a food has sugars included in it does not make it \"unhealthy\"."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "4a1214ccd938",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "853854e0df08",
+              "_type": "span",
+              "marks": [],
+              "text": "Carbohydrate availability (how much glycogen we have) remains relevant to training "
+            },
+            {
+              "_key": "b89eb2280058",
+              "_type": "span",
+              "marks": [
+                "strong"
+              ],
+              "text": "performance"
+            },
+            {
+              "_key": "b21161fdb9a3",
+              "_type": "span",
+              "marks": [],
+              "text": " and "
+            },
+            {
+              "_key": "72d972c83311",
+              "_type": "span",
+              "marks": [
+                "strong"
+              ],
+              "text": "recovery"
+            },
+            {
+              "_key": "162071f6fe84",
+              "_type": "span",
+              "marks": [],
+              "text": ", particularly when training volume or intensity is high. The required amount depends on the athlete, the session and the broader programme, where sweetness is one potential delivery format, not the physiological target itself."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "af633c1d9472",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "d1c874ed1a93",
+              "_type": "span",
+              "marks": [
+                "strong"
+              ],
+              "text": "Ingredients that contribute sweetness"
+            }
+          ],
+          "markDefs": [],
+          "style": "h2"
+        },
+        {
+          "_key": "bd46ac96245a",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "7c1c60fb817e",
+              "_type": "span",
+              "marks": [],
+              "text": "Obvious sources include sugar, honey, maple syrup, syrups and sweeteners. Plenty of minimally processed foods also provide useful sweetness:"
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "38e3a538db5f",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "c3e3a4fc422a",
+              "_type": "span",
+              "marks": [],
+              "text": "Ripe bananas, mangoes, grapes, apples and stone fruits"
+            }
+          ],
+          "level": 1,
+          "listItem": "bullet",
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "f2db4813f6f5",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "96f0ff4ac466",
+              "_type": "span",
+              "marks": [],
+              "text": "Berries and cooked fruit"
+            }
+          ],
+          "level": 1,
+          "listItem": "bullet",
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "471ccf338aef",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "05101fa06140",
+              "_type": "span",
+              "marks": [],
+              "text": "Dates, raisins and other dried fruit"
+            }
+          ],
+          "level": 1,
+          "listItem": "bullet",
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "c12aa71eaa2f",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "ffe99a560520",
+              "_type": "span",
+              "marks": [],
+              "text": "Milk and yoghurt through lactose"
+            }
+          ],
+          "level": 1,
+          "listItem": "bullet",
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "7995b6b2cb4b",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "b6467144ff27",
+              "_type": "span",
+              "marks": [],
+              "text": "Sweet potatoes, carrots, squash, peas and sweetcorn"
+            }
+          ],
+          "level": 1,
+          "listItem": "bullet",
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "f339bded3fc7",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "ec8af1f92672",
+              "_type": "span",
+              "marks": [],
+              "text": "Onions and garlic, particularly after browning or slow cooking"
+            }
+          ],
+          "level": 1,
+          "listItem": "bullet",
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "b8a43dedacce",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "5793e788f82b",
+              "_type": "span",
+              "marks": [],
+              "text": "Tomato products, which contain both sweetness and acidity"
+            }
+          ],
+          "level": 1,
+          "listItem": "bullet",
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "5d7c41ef75d5",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "4e10e8c5fc03",
+              "_type": "span",
+              "marks": [],
+              "text": "Cooking can concentrate water-soluble sugars and generate caramelised or roasted aromas which add additional and unique flavour bonus points, demonstrating the versatility of sweet foods. This is why roasted carrots and slowly cooked onions taste markedly sweeter than their raw equivalents, even when no sugar has been added."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "e7caccf8f6db",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "2c37d1dae22e",
+              "_type": "span",
+              "marks": [
+                "strong"
+              ],
+              "text": "Sweetness as balance"
+            }
+          ],
+          "markDefs": [],
+          "style": "h2"
+        },
+        {
+          "_key": "ceb1acadd0cb",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "ad506ff62e8e",
+              "_type": "span",
+              "marks": [],
+              "text": "Sweetness is especially useful in meals dominated by bitterness or acidity."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "8becaad0001a",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "38d5ff1bfe8b",
+              "_type": "span",
+              "marks": [],
+              "text": "Cocoa, coffee, certain protein powders and some high-protein yoghurts can produce a "
+            },
+            {
+              "_key": "f741c16828b6",
+              "_type": "span",
+              "marks": [
+                "strong"
+              ],
+              "text": "bitter"
+            },
+            {
+              "_key": "b65d41448f5f",
+              "_type": "span",
+              "marks": [],
+              "text": " or astringent finish. Berries add "
+            },
+            {
+              "_key": "6ef68cbf8c6e",
+              "_type": "span",
+              "marks": [
+                "strong"
+              ],
+              "text": "acidity"
+            },
+            {
+              "_key": "ba077b07644b",
+              "_type": "span",
+              "marks": [],
+              "text": ". Combining all of these in one bowl can create an impressive nutritional label but an unpleasant breakfast."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "a91c13e42fac",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "7fd88efe1518",
+              "_type": "span",
+              "marks": [],
+              "text": "A small amount of sweetness - such as via a drizzle of honey or a ripe banana - suppresses some of the harshness, mellowing the bitter and sour/acidic tones, helping the dish come together. The required quantity is often modest because the objective is "
+            },
+            {
+              "_key": "ab7a836dcbaf",
+              "_type": "span",
+              "marks": [
+                "em"
+              ],
+              "text": "balance"
+            },
+            {
+              "_key": "6e629fcbf7ee",
+              "_type": "span",
+              "marks": [],
+              "text": " rather than dessert-level sweetness. Additionally, taste-mixture research shows that sweetness can be a strong suppressor of other taste qualities, although the size of the effect depends on concentration and context."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "ad546e2aac2e",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "6e5bbd059216",
+              "_type": "span",
+              "marks": [],
+              "text": "Sweetness can also improve "
+            },
+            {
+              "_key": "1824abbb79dd",
+              "_type": "span",
+              "marks": [
+                "strong"
+              ],
+              "text": "savoury"
+            },
+            {
+              "_key": "4ca72836ce0c",
+              "_type": "span",
+              "marks": [],
+              "text": " food:"
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "139721998fac",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "dfe99b047c56",
+              "_type": "span",
+              "marks": [],
+              "text": "A small amount of honey can round a sharp mustard dressing."
+            }
+          ],
+          "level": 1,
+          "listItem": "bullet",
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "a6159c2d8d79",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "3a1b736e6ed4",
+              "_type": "span",
+              "marks": [],
+              "text": "Sugar can soften an excessively acidic tomato sauce (think ketchup)."
+            }
+          ],
+          "level": 1,
+          "listItem": "bullet",
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "b3e868f8f165",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "b2f29f8ce0f5",
+              "_type": "span",
+              "marks": [],
+              "text": "Mango or pineapple can balance chilli heat or salty soy sauce (think jerk chicken and mango)."
+            }
+          ],
+          "level": 1,
+          "listItem": "bullet",
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "69e523a74f37",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "aee0880357a7",
+              "_type": "span",
+              "marks": [],
+              "text": "Roasted squash can provide contrast in a bitter kale salad."
+            }
+          ],
+          "level": 1,
+          "listItem": "bullet",
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "3b144998f2a8",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "60e49fa1fa77",
+              "_type": "span",
+              "marks": [],
+              "text": "A little maple syrup can make miso-coated vegetables substantially more appealing."
+            }
+          ],
+          "level": 1,
+          "listItem": "bullet",
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "16e2aba58afc",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "9d6467e46596",
+              "_type": "span",
+              "marks": [],
+              "text": "The \"correct\" "
+            },
+            {
+              "_key": "84e2c332ab73",
+              "_type": "span",
+              "marks": [
+                "em"
+              ],
+              "text": "amount"
+            },
+            {
+              "_key": "788fbecb5f80",
+              "_type": "span",
+              "marks": [],
+              "text": " often is often imperceptible, where you should notice that the meal tastes more "
+            },
+            {
+              "_key": "13dd0571cceb",
+              "_type": "span",
+              "marks": [
+                "strong"
+              ],
+              "text": "complete"
+            },
+            {
+              "_key": "87d49e9bb489",
+              "_type": "span",
+              "marks": [],
+              "text": ", rather than identifying sugar as a dominant flavour."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "1d77b26aa778",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "9c8e05172b53",
+              "_type": "span",
+              "marks": [
+                "strong"
+              ],
+              "text": "Composite coaching case: if your protein bowl tastes “too healthy”"
+            }
+          ],
+          "markDefs": [],
+          "style": "h2"
+        },
+        {
+          "_key": "aae7351518ea",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "1c7cd103f03a",
+              "_type": "span",
+              "marks": [],
+              "text": "A client combined low-fat Greek yogurt, chocolate whey, cocoa powder, oats and frozen raspberries."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "1bcbf7b49722",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "2b8744210d03",
+              "_type": "span",
+              "marks": [],
+              "text": "On paper, it was an efficient and nutritionally-excellent breakfast, but In practice, it tasted sour, bitter and chalky. The client assumed the problem was the yogurt and began looking for a more processed protein snack."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "343c5171857e",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "e484874caf49",
+              "_type": "span",
+              "marks": [],
+              "text": "The problem was the "
+            },
+            {
+              "_key": "75c977bb0b12",
+              "_type": "span",
+              "marks": [
+                "strong"
+              ],
+              "text": "balance"
+            },
+            {
+              "_key": "2cacbe0b6072",
+              "_type": "span",
+              "marks": [],
+              "text": "."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "ce17aa9dde5a",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "3ca31b0ec52d",
+              "_type": "span",
+              "marks": [],
+              "text": "The revised bowl used ripe banana for "
+            },
+            {
+              "_key": "b2284ea72193",
+              "_type": "span",
+              "marks": [
+                "em"
+              ],
+              "text": "sweetness"
+            },
+            {
+              "_key": "3c7068fe5e91",
+              "_type": "span",
+              "marks": [],
+              "text": ", a pinch of salt to soften the cocoa’s "
+            },
+            {
+              "_key": "30cc5aa11122",
+              "_type": "span",
+              "marks": [
+                "em"
+              ],
+              "text": "bitterness"
+            },
+            {
+              "_key": "93b150829150",
+              "_type": "span",
+              "marks": [],
+              "text": " and enough oats or cereal to provide contrast in "
+            },
+            {
+              "_key": "17ce2360dc52",
+              "_type": "span",
+              "marks": [
+                "em"
+              ],
+              "text": "texture,"
+            },
+            {
+              "_key": "644ff4206e04",
+              "_type": "span",
+              "marks": [],
+              "text": " with an optional 5-10 grams of honey available as an adjustable finish in case more sweetness was needed to moderate."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "4723d5ce10c7",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "0b03bfe8eb9a",
+              "_type": "span",
+              "marks": [],
+              "text": "The breakfast now contained sweetness from fruit, sourness from yogurt and berries, bitterness from cocoa, salt in a supporting role and some savoury depth from the dairy protein."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "a4423aec4388",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "9399c2218a9d",
+              "_type": "span",
+              "marks": [
+                "strong"
+              ],
+              "text": "Example Recipe: Cocoa Cherry Recovery Bowl"
+            }
+          ],
+          "markDefs": [],
+          "style": "h2"
+        },
+        {
+          "_key": "1437fc71d29c",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "c7afb0259a47",
+              "_type": "span",
+              "marks": [
+                "strong"
+              ],
+              "text": "Makes one substantial serving"
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "87199f70c3a1",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "57bb97261b30",
+              "_type": "span",
+              "marks": [
+                "strong"
+              ],
+              "text": "Ingredients"
+            }
+          ],
+          "markDefs": [],
+          "style": "h3"
+        },
+        {
+          "_key": "bf1cded777ee",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "eb271fc83475",
+              "_type": "span",
+              "marks": [],
+              "text": "250 g fat-free Greek yogurt or Skyr"
+            }
+          ],
+          "level": 1,
+          "listItem": "bullet",
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "0a02d69bcda6",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "0f064b48685f",
+              "_type": "span",
+              "marks": [],
+              "text": "20-30 g Chocolate or Vanilla Protein Powder"
+            }
+          ],
+          "level": 1,
+          "listItem": "bullet",
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "e7a62ac32ee4",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "de4e7729c76d",
+              "_type": "span",
+              "marks": [],
+              "text": "40-60 g Oats, Cereal or Granola ("
+            },
+            {
+              "_key": "7131e963fad0",
+              "_type": "span",
+              "marks": [
+                "em"
+              ],
+              "text": "scaled to training demand"
+            },
+            {
+              "_key": "75db83e950b1",
+              "_type": "span",
+              "marks": [],
+              "text": ")"
+            }
+          ],
+          "level": 1,
+          "listItem": "bullet",
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "c03c2737fdef",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "83e798d391a9",
+              "_type": "span",
+              "marks": [],
+              "text": "100 g Cherries or Berries"
+            }
+          ],
+          "level": 1,
+          "listItem": "bullet",
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "c1d52ae13468",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "cda30d3edfde",
+              "_type": "span",
+              "marks": [],
+              "text": "½ ripe Banana ("
+            },
+            {
+              "_key": "ae336680b8f8",
+              "_type": "span",
+              "marks": [
+                "em"
+              ],
+              "text": "mashed"
+            },
+            {
+              "_key": "e9f6e8e6eb32",
+              "_type": "span",
+              "marks": [],
+              "text": ")"
+            }
+          ],
+          "level": 1,
+          "listItem": "bullet",
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "8ca52f50f90d",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "557b789e21ba",
+              "_type": "span",
+              "marks": [],
+              "text": "1 tsp Cocoa Powder"
+            }
+          ],
+          "level": 1,
+          "listItem": "bullet",
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "2314038bdf5d",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "48324f511e99",
+              "_type": "span",
+              "marks": [],
+              "text": "A small pinch of Salt"
+            }
+          ],
+          "level": 1,
+          "listItem": "bullet",
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "bd05d9627af1",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "4cecf1a9cb19",
+              "_type": "span",
+              "marks": [],
+              "text": "Cinnamon"
+            }
+          ],
+          "level": 1,
+          "listItem": "bullet",
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "efe8666e1728",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "85961fbae595",
+              "_type": "span",
+              "marks": [],
+              "text": "1 tsp Honey or Maple Syrup ("
+            },
+            {
+              "_key": "5a015e2d926a",
+              "_type": "span",
+              "marks": [
+                "em"
+              ],
+              "text": "optional"
+            },
+            {
+              "_key": "897b9e4edad7",
+              "_type": "span",
+              "marks": [],
+              "text": ")"
+            }
+          ],
+          "level": 1,
+          "listItem": "bullet",
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "a8729e7c7dea",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "2f45d69c30b7",
+              "_type": "span",
+              "marks": [
+                "strong"
+              ],
+              "text": "Method"
+            }
+          ],
+          "markDefs": [],
+          "style": "h3"
+        },
+        {
+          "_key": "ccac974f3d80",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "0cb7b997e898",
+              "_type": "span",
+              "marks": [],
+              "text": "Mix the yogurt, protein powder, mashed banana, cocoa and salt."
+            }
+          ],
+          "level": 1,
+          "listItem": "number",
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "1854f9f8cf94",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "6bf5c135921a",
+              "_type": "span",
+              "marks": [],
+              "text": "Taste before adding further sweetness."
+            }
+          ],
+          "level": 1,
+          "listItem": "number",
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "09fc6d9a03d8",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "311c4b92e8f8",
+              "_type": "span",
+              "marks": [],
+              "text": "Add the fruit and oats or cereal."
+            }
+          ],
+          "level": 1,
+          "listItem": "number",
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "19e69e2939d2",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "b5746adc9ddf",
+              "_type": "span",
+              "marks": [],
+              "text": "Use honey or maple syrup to moderate if the bowl tastes too sour or bitter."
+            }
+          ],
+          "level": 1,
+          "listItem": "number",
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "c0c448c22adf",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "8b23e8911ee6",
+              "_type": "span",
+              "marks": [],
+              "text": "*If it becomes cloying, add more berries, a spoonful of plain yoghurt or a small amount of cocoa."
+            }
+          ],
+          "level": 1,
+          "listItem": "number",
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "97f5114c0df9",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "fa61bac2a244",
+              "_type": "span",
+              "marks": [],
+              "text": "For post-training use, scale the oats, cereal, fruit or honey according to needs."
+            }
+          ],
+          "level": 1,
+          "listItem": "number",
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "777b75da2267",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "ed7db54badd7",
+              "_type": "span",
+              "marks": [
+                "em"
+              ],
+              "text": "*I would encourage you to at least once play around with making the dish too sour... neutralise with sweetness... take it to too sweet... neutralise with sour... etc. so you gain an appreciation for how to moderate and use flavour effectively"
+            },
+            {
+              "_key": "d6868300d611",
+              "_type": "span",
+              "marks": [],
+              "text": " "
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "5fe79c36005e",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "1fff8fa4b401",
+              "_type": "span",
+              "marks": [],
+              "text": "The banana provides sweetness and body. Salt reduces bitterness. Cherries or berries supply acidity. Cocoa contributes bitterness and roasted aroma. The result has contrast rather than relying on sweetness alone - something many would assume just by reading the title."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "f5b61d57a7fd",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "5f49bc81b6a8",
+              "_type": "span",
+              "marks": [
+                "strong"
+              ],
+              "text": "What does a sweet craving mean?"
+            }
+          ],
+          "markDefs": [],
+          "style": "h2"
+        },
+        {
+          "_key": "d022711f8e75",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "78c1de84fff1",
+              "_type": "span",
+              "marks": [],
+              "text": "Sweet cravings are often interpreted too confidently."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "aaca5de2ad09",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "f0a0202c1928",
+              "_type": "span",
+              "marks": [],
+              "text": "They are sometimes presented as proof of magnesium deficiency, chromium deficiency, low glycogen or “sugar addiction”. A craving cannot diagnose any of these conditions. In fact, the "
+            },
+            {
+              "_key": "9cec0ca4d09f",
+              "_type": "span",
+              "marks": [
+                "strong",
+                "underline"
+              ],
+              "text": "only"
+            },
+            {
+              "_key": "5f0adbd5a62b",
+              "_type": "span",
+              "marks": [],
+              "text": " taste we have a physiologically pre-disposed sensitivity to in this sense is "
+            },
+            {
+              "_key": "0de7b9d3939e",
+              "_type": "span",
+              "marks": [
+                "strong"
+              ],
+              "text": "salt"
+            },
+            {
+              "_key": "2eb7718e452b",
+              "_type": "span",
+              "marks": [],
+              "text": ", due to its role in cardiovascular function."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "6bb08e90e92c",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "f0e2ee4bf1aa",
+              "_type": "span",
+              "marks": [],
+              "text": "Acute sleep restriction can alter hunger and food reward. In one controlled "
+            },
+            {
+              "_key": "8a2bec27d1b5",
+              "_type": "span",
+              "marks": [
+                "a096f9a03a02"
+              ],
+              "text": "study"
+            },
+            {
+              "_key": "403eb22f270e",
+              "_type": "span",
+              "marks": [],
+              "text": ", sleep restriction increased "
+            },
+            {
+              "_key": "bf33906554ed",
+              "_type": "span",
+              "marks": [
+                "strong"
+              ],
+              "text": "ghrelin"
+            },
+            {
+              "_key": "af5e56341cad",
+              "_type": "span",
+              "marks": [],
+              "text": " and snack intake, with much of the additional energy coming from carbohydrate-rich foods. Other experimental work indicates that caloric deprivation can heighten attention and reward responses to food cues."
+            }
+          ],
+          "markDefs": [
+            {
+              "_key": "a096f9a03a02",
+              "_type": "externalLink",
+              "href": "https://pubmed.ncbi.nlm.nih.gov/26467988/",
+              "openInNewTab": true
+            }
+          ],
+          "style": "normal"
+        },
+        {
+          "_key": "8a65eb8a7142",
+          "_type": "pullQuote",
+          "markDefs": null,
+          "quote": "Ghrelin is a peptide hormone produced mainly by the stomach that stimulates appetite, increases food intake, and promotes fat storage. Widely known as the \"hunger hormone,\" its levels surge when your stomach is empty to signal your brain it's time to eat, and drop after a meal."
+        },
+        {
+          "_key": "d7e17238cf75",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "486fc85567fd",
+              "_type": "span",
+              "marks": [],
+              "text": "That does not mean "
+            },
+            {
+              "_key": "cab2f580df84",
+              "_type": "span",
+              "marks": [
+                "em"
+              ],
+              "text": "every"
+            },
+            {
+              "_key": "5738782c35b1",
+              "_type": "span",
+              "marks": [],
+              "text": " craving is caused by poor sleep or under-fuelling. "
+            },
+            {
+              "_key": "e8fb05db712e",
+              "_type": "span",
+              "marks": [
+                "3d9ef5505e9b"
+              ],
+              "text": "Longer dietary interventions"
+            },
+            {
+              "_key": "cd08f24628e2",
+              "_type": "span",
+              "marks": [],
+              "text": " sometimes even show reductions in food cravings during energy restriction, illustrating that the response is not uniform. Food access, learned habits, dietary rules and repeated exposure all contribute."
+            }
+          ],
+          "markDefs": [
+            {
+              "_key": "3d9ef5505e9b",
+              "_type": "externalLink",
+              "href": "https://pubmed.ncbi.nlm.nih.gov/16493129/",
+              "openInNewTab": true
+            }
+          ],
+          "style": "normal"
+        },
+        {
+          "_key": "7b89515a08c4",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "583b89277dad",
+              "_type": "span",
+              "marks": [],
+              "text": "When sweet cravings become persistent, we assess the broader pattern:"
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "5ab96cb0367f",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "9bf4405a876f",
+              "_type": "span",
+              "marks": [],
+              "text": "Is total energy intake appropriate for the "
+            },
+            {
+              "_key": "c960127599c1",
+              "_type": "span",
+              "marks": [
+                "em"
+              ],
+              "text": "training load"
+            },
+            {
+              "_key": "8165307ccc46",
+              "_type": "span",
+              "marks": [],
+              "text": "?"
+            }
+          ],
+          "level": 1,
+          "listItem": "bullet",
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "814505591692",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "a31934a18667",
+              "_type": "span",
+              "marks": [],
+              "text": "Are carbohydrate-rich foods concentrated into a "
+            },
+            {
+              "_key": "006f7eb3b466",
+              "_type": "span",
+              "marks": [
+                "em"
+              ],
+              "text": "narrow part"
+            },
+            {
+              "_key": "e47eeb7227e0",
+              "_type": "span",
+              "marks": [],
+              "text": " of the day?"
+            }
+          ],
+          "level": 1,
+          "listItem": "bullet",
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "584be2d68559",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "bc4bb6d0c8cf",
+              "_type": "span",
+              "marks": [],
+              "text": "Are meals being "
+            },
+            {
+              "_key": "3fd78bc58faa",
+              "_type": "span",
+              "marks": [
+                "em"
+              ],
+              "text": "skipped"
+            },
+            {
+              "_key": "36fcf3e877de",
+              "_type": "span",
+              "marks": [],
+              "text": " during busy work periods?"
+            }
+          ],
+          "level": 1,
+          "listItem": "bullet",
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "b9460f05a2bc",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "823ee1e17306",
+              "_type": "span",
+              "marks": [],
+              "text": "Is the "
+            },
+            {
+              "_key": "434238892521",
+              "_type": "span",
+              "marks": [
+                "em"
+              ],
+              "text": "post-training"
+            },
+            {
+              "_key": "a0617cf631ec",
+              "_type": "span",
+              "marks": [],
+              "text": " meal sufficiently large if this is a key hunger driver?"
+            }
+          ],
+          "level": 1,
+          "listItem": "bullet",
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "79ff85ea4d4e",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "b787c90ce8b7",
+              "_type": "span",
+              "marks": [],
+              "text": "Has "
+            },
+            {
+              "_key": "511e198e1f4c",
+              "_type": "span",
+              "marks": [
+                "em"
+              ],
+              "text": "sleep"
+            },
+            {
+              "_key": "29bc57d1afe8",
+              "_type": "span",
+              "marks": [],
+              "text": " been poor?"
+            }
+          ],
+          "level": 1,
+          "listItem": "bullet",
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "f5f1ba8f9fdd",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "1435d3b8a5cd",
+              "_type": "span",
+              "marks": [],
+              "text": "Have sweet foods been "
+            },
+            {
+              "_key": "6dc215f00d91",
+              "_type": "span",
+              "marks": [
+                "em"
+              ],
+              "text": "labelled"
+            },
+            {
+              "_key": "05d28779f073",
+              "_type": "span",
+              "marks": [],
+              "text": " completely off-limits?"
+            }
+          ],
+          "level": 1,
+          "listItem": "bullet",
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "86073a4ca6fd",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "d7d3ca6a0ab7",
+              "_type": "span",
+              "marks": [],
+              "text": "Is the craving occurring at a "
+            },
+            {
+              "_key": "940349da6a4b",
+              "_type": "span",
+              "marks": [
+                "em"
+              ],
+              "text": "repeated time and location"
+            },
+            {
+              "_key": "73ac834399d9",
+              "_type": "span",
+              "marks": [],
+              "text": ", regardless of hunger?"
+            }
+          ],
+          "level": 1,
+          "listItem": "bullet",
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "38d6f4f311b3",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "958a5527bcc2",
+              "_type": "span",
+              "marks": [
+                "strong"
+              ],
+              "text": "Repeated exposure"
+            },
+            {
+              "_key": "92f89a2444d5",
+              "_type": "span",
+              "marks": [],
+              "text": " also influences perception. In a "
+            },
+            {
+              "_key": "bc31a520958d",
+              "_type": "span",
+              "marks": [
+                "84bcf9bb3856"
+              ],
+              "text": "five-month trial"
+            },
+            {
+              "_key": "e697873d2f17",
+              "_type": "span",
+              "marks": [],
+              "text": ", lowering simple-sugar intake increased perceived sweet "
+            },
+            {
+              "_key": "336da8c3c937",
+              "_type": "span",
+              "marks": [
+                "em"
+              ],
+              "text": "intensity"
+            },
+            {
+              "_key": "4b0920fd756d",
+              "_type": "span",
+              "marks": [],
+              "text": ", although it did not reliably change "
+            },
+            {
+              "_key": "e2b319c5767e",
+              "_type": "span",
+              "marks": [
+                "em"
+              ],
+              "text": "pleasantness"
+            },
+            {
+              "_key": "30452e7d5982",
+              "_type": "span",
+              "marks": [],
+              "text": ". The same food can therefore begin to taste sweeter after dietary exposure changes, but preference does not necessarily follow in sync."
+            }
+          ],
+          "markDefs": [
+            {
+              "_key": "84bcf9bb3856",
+              "_type": "externalLink",
+              "href": "https://drive.google.com/file/d/1iYZnGLX_OuW7x5o6ZowS3iI7oeqCpx5z/view?usp=sharing",
+              "openInNewTab": true
+            }
+          ],
+          "style": "normal"
+        },
+        {
+          "_key": "c3737afa6553",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "1ca2afeb4bd4",
+              "_type": "span",
+              "marks": [
+                "strong"
+              ],
+              "text": "Sweetness and sustainable nutrition"
+            }
+          ],
+          "markDefs": [],
+          "style": "h2"
+        },
+        {
+          "_key": "e06c76b0cd60",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "1e489d10e567",
+              "_type": "span",
+              "marks": [],
+              "text": "Learning to use sweetness removes the false dichotomy between joyless food and uncontrolled indulgence."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "691c3cc1aed8",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "f86bf6f62b3e",
+              "_type": "span",
+              "marks": [],
+              "text": "An intentional amount of sugar, honey or ripe fruit can save a high-protein breakfast, increase vegetable intake and make a lower-energy sauce substantially more satisfying. Its contribution should be judged in the context of the full meal and the full diet."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        },
+        {
+          "_key": "279e9d352d19",
+          "_type": "block",
+          "children": [
+            {
+              "_key": "88ce14fc9298",
+              "_type": "span",
+              "marks": [],
+              "text": "Performance nutrition becomes more sustainable when sweetness is planned, portioned and its role is understood. Treating it as contraband only makes it more psychologically conflicting. Treating it as one adjustable part of flavour provides considerably more control."
+            }
+          ],
+          "markDefs": [],
+          "style": "normal"
+        }
+      ],
+      "categories": [
+        {
+          "_id": "2d60615d-966a-4372-8352-7276c9883060",
+          "description": "Performance and lifestyle nutrition related articles",
+          "slug": "nutrition",
+          "title": "Nutrition"
+        }
+      ],
+      "coverImage": {
+        "alt": "jerk chicken with mango, lime and pepper salsa",
+        "aspectRatio": 0.6666666666666666,
+        "caption": "sweet mango and red peppers balance the sour and bitter of lime and green peppers",
+        "credit": null,
+        "crop": null,
+        "height": 1620,
+        "hotspot": null,
+        "url": "https://cdn.sanity.io/images/stkjtr6l/production/832cd71c0b4ed5f5837a356eeb089c7f37648ff8-1080x1620.jpg",
+        "width": 1080
+      },
+      "estimatedReadingTime": 9,
+      "excerpt": "How sweetness helps control and balance sour and bitter flavours in the foods we eat",
+      "publishedAt": "2026-07-19T07:00:00.000Z",
+      "seo": {
+        "_type": "seo",
+        "noIndex": false,
+        "socialImage": null
+      },
+      "slug": "sweetness",
+      "tags": [
+        {
+          "_id": "61c0d8a1-37b6-4485-9bf2-36e42500dca9",
+          "slug": "cooking",
+          "title": "Cooking"
+        }
+      ],
+      "title": "Sweet Controls Sour and Bitter",
+      "updatedAt": "2026-07-19T12:04:02Z"
+    },
     {
       "_id": "42a73094-f3e7-4d38-89cc-7f45d6a7943d",
       "author": {
@@ -407,17 +2170,24 @@
       "slug": "protein-distribution-strength-hypertrophy",
       "tags": [],
       "title": "Protein Distribution: What Matters for Strength and Hypertrophy",
-      "updatedAt": null
+      "updatedAt": "2026-07-17T08:18:29Z"
     }
   ],
   "categories": [
     {
       "_id": "2d60615d-966a-4372-8352-7276c9883060",
-      "articleCount": 1,
+      "articleCount": 2,
       "description": "Performance and lifestyle nutrition related articles",
       "slug": "nutrition",
       "title": "Nutrition"
     }
   ],
-  "tags": []
+  "tags": [
+    {
+      "_id": "61c0d8a1-37b6-4485-9bf2-36e42500dca9",
+      "articleCount": 1,
+      "slug": "cooking",
+      "title": "Cooking"
+    }
+  ]
 }
