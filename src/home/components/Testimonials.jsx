@@ -86,9 +86,6 @@ export function Testimonials() {
         <Reveal as="h2" delay={0.08}>
           <span>Client outcomes,</span> in their <em>own words.</em>
         </Reveal>
-        <Reveal as="p" delay={0.14}>
-          These accounts describe each client’s experience. Results vary according to starting point, adherence, training history and individual circumstances.
-        </Reveal>
       </header>
 
       <Reveal className="testimonials__carousel" delay={0.18}>
@@ -220,10 +217,6 @@ export function Testimonials() {
           </div>
         </div>
       </div>
-
-      <p className="testimonials__disclaimer">
-        Individual outcomes vary. Images and testimonials represent the experience of the clients shown and do not guarantee a particular result.
-      </p>
     </section>
   )
 }
