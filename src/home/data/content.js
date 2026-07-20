@@ -9,18 +9,18 @@ export const methodSteps = [
     index: '02',
     title: 'Prescribe',
     signal: 'One coordinated plan',
-    copy: 'Training and nutrition are built together so that volume, intensity, energy intake and meal structure support the same goal.',
+    copy: 'Training and nutrition are built together so that volume, intensity, energy intake and meal structure support each other harmoniously.',
   },
   {
     index: '03',
     title: 'Review',
-    signal: 'Weekly feedback, interpreted',
-    copy: 'Performance, adherence, appetite, digestion, sleep and recovery are reviewed in context. One difficult day is not treated as a trend.',
+    signal: 'Weekly feedback. Focused. Goal-directed.',
+    copy: 'Performance, adherence, appetite, digestion, sleep and recovery are reviewed and modified in context of trends and the bigger picture; no knee jerking at a bad day.',
   },
   {
     index: '04',
     title: 'Refine',
-    signal: 'Change only what needs changing',
+    signal: 'Change what **needs** changing',
     copy: 'The programme develops as your capacity and circumstances change, with the reasoning behind each decision explained clearly.',
   },
 ]
@@ -147,18 +147,26 @@ export const qualifications = [
 export const faqs = [
   {
     question: 'Do I need to compete?',
-    answer: 'No. The service is designed for everyday athletes who train consistently and want a more individualised approach. Competition preparation is available within Rx+ when relevant.',
+    answer: 'No. The service is designed for everyday athletes who train consistently and want a more individualised approach. Amateur competition preparation is available for Rx. Pro competition preparation within Rx+. Bodybuilding (all levels) requires Rx+ and has extremely limited spaces, on application only, and requires 6 month up front payment; no exceptions.',
   },
   {
-    question: 'What does biofeedback mean here?',
-    answer: 'Relevant information can include appetite, digestion, sleep, soreness, perceived recovery, training performance and bodyweight trends. It is considered alongside adherence and the wider context of your week.',
+    question: 'What do you mean by biofeedback?',
+    answer: 'Relevant information can include appetite, energy, digestion, sleep, soreness, stress levels, perceived recovery, training performance and bodyweight trends. It is considered alongside your plan, adherence and the wider context of your week and lifestyle.',
   },
   {
     question: 'Do I need to track calories?',
-    answer: 'Not necessarily. The nutrition method can use targets, portions, meal structure or a combination. The level of detail should be sufficient for the goal and realistic to apply.',
+    answer: 'Yes. If I cannot see what you’re eating, I cannot coach with the level of precision that is needed to make systematic and meaningful adjustments to your plan. Whether you are a training or nutrition only client, tracking nutrition is non-negotiable and you will be provided with professional grade software that is easy to use.',
   },
   {
     question: 'What happens after I apply?',
-    answer: 'Your application is reviewed to establish whether the service is appropriate for your goals and circumstances. Completing the questionnaire does not commit you to coaching or create a coaching relationship.',
+    answer: 'Your application is reviewed by myself (Dr Will Dyson) and myself alone to establish whether the service is appropriate for your goals and circumstances. Completing the questionnaire does not commit you to coaching or create a coaching relationship.',
+  },
+  {
+    question: 'Is there a minimum commitment?',
+    answer: 'A minimum commitment of 3 months is expected of all clients. Alternatively, you may pay a one-off onboarding fee of £100. A period of one month’s notice is required for any cancellations.',
+  },
+  {
+    question: 'Do you offer consultations?',
+    answer: 'Yes. Consultations are purchased in a minimum package of 3 at a rate of £150/90 minutes for training, nutrition or scientific expertise. Single consultations are not available due to lack of context or review. Any unused purchases expire if not used within 7 months.',
   },
 ]
