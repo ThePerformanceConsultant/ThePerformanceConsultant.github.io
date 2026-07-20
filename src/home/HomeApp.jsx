@@ -48,7 +48,7 @@ function OpeningSequence({ visible }) {
 }
 
 function SignalBand() {
-  const signals = ['Training', 'Nutrition', 'Recovery', 'Feedback', 'Progression']
+  const signals = ['Training', 'Nutrition', 'Strength", 'Recovery', 'Fitness', 'Hybrid', 'Feedback', 'Progression',]
   return (
     <div className="signal-band" aria-hidden="true">
       <div className="signal-band__track">
@@ -78,7 +78,7 @@ function Proposition() {
       </div>
       <div className="proposition__detail">
         <Reveal as="p">
-          More work is useful only when it is directed. Coaching connects the programme, food, recovery and weekly workload so decisions are based on the whole picture.
+          Too many put their work ethic to waste thinking "more = better". True coaching coordinates training, food, recovery and your weekly commitments like a symphony - harmonised and seamless, as it should be.
         </Reveal>
         <div className="proposition__facts">
           <Reveal delay={0.05}><strong>4–6</strong><span>training sessions<br />per week</span></Reveal>
