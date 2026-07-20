@@ -48,7 +48,7 @@ function OpeningSequence({ visible }) {
 }
 
 function SignalBand() {
-  const signals = ['Training', 'Nutrition', 'Strength", 'Recovery', 'Fitness', 'Hybrid', 'Feedback', 'Progression',]
+  const signals = ['Training', 'Nutrition', 'Strength', 'Recovery', 'Fitness', 'Hybrid', 'Feedback', 'Progression',]
   return (
     <div className="signal-band" aria-hidden="true">
       <div className="signal-band__track">
@@ -94,15 +94,15 @@ function AthleteFit() {
   return (
     <section className="athlete-fit">
       <div className="athlete-fit__title">
-        <Reveal><SectionLabel index="Fit" light>Who this is built for</SectionLabel></Reveal>
+        <Reveal><SectionLabel index="Fit" light>Who this is for</SectionLabel></Reveal>
         <Reveal as="h2" delay={0.08}>Consistent athletes with <em>full lives.</em></Reveal>
       </div>
       <div className="athlete-fit__list">
         {[
-          'You train regularly and want a plan that reflects your actual week.',
-          'You value evidence, direct feedback and clear explanations.',
-          'You can report honestly, apply the plan and take responsibility for the work.',
-          'You want performance and body composition decisions considered together.',
+          'You train regularly and want a plan that works with your lifestyle.',
+          'You value evidence, direct feedback, clear explanations and want to learn while you achieve.',
+          'You report honestly, do the work and take responsibility for the work.',
+          'You want to be strong, fit, healthy, feel good and look great.',
         ].map((item, index) => (
           <Reveal key={item} delay={index * 0.06}>
             <span>0{index + 1}</span><p>{item}</p>
