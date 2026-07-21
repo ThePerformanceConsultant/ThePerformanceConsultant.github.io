@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-19T12:14:36.233Z",
+  "generatedAt": "2026-07-21T07:04:06.371Z",
   "settings": {
     "featuredArticles": [
       {
@@ -137,21 +137,7 @@
               "_key": "3e368f569876",
               "_type": "span",
               "marks": [],
-              "text": "Sweetness carries an unusual amount of moral baggage in fitness culture."
-            }
-          ],
-          "markDefs": [],
-          "style": "normal"
-        },
-        {
-          "_key": "b31e2471c1be",
-          "_type": "block",
-          "children": [
-            {
-              "_key": "67f70cae59fb",
-              "_type": "span",
-              "marks": [],
-              "text": "Sweet foods are often associated with rewards, \"cheat meals\", weakness or evidence of poor discipline, making it difficult to use sweetness "
+              "text": "Sweetness carries an unusual amount of moral baggage in fitness culture... Sweet foods are often associated with rewards, \"cheat meals\", weakness or evidence of poor discipline, making it difficult to use sweetness "
             },
             {
               "_key": "bdc2bea2a62f",
@@ -169,7 +155,7 @@
             }
           ],
           "markDefs": [],
-          "style": "normal"
+          "style": "dropCap"
         },
         {
           "_key": "2ee63d37295f",
@@ -1838,7 +1824,7 @@
         }
       ],
       "title": "Sweet Controls Sour and Bitter",
-      "updatedAt": "2026-07-19T12:04:02Z"
+      "updatedAt": "2026-07-19T16:18:09Z"
     },
     {
       "_id": "42a73094-f3e7-4d38-89cc-7f45d6a7943d",

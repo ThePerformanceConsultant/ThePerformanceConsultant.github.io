@@ -130,6 +130,7 @@ function FinalCta({ onApply }) {
 export default function App() {
   const [opening, setOpening] = useState(true)
   const [applicationOpen, setApplicationOpen] = useState(false)
+  const [applicationInitialPlan, setApplicationInitialPlan] = useState('')
   const pointerFrame = useRef(null)
   const { scrollYProgress } = useScroll()
   const smoothProgress = useSpring(scrollYProgress, { stiffness: 110, damping: 24, mass: 0.35 })
@@ -155,7 +156,10 @@ export default function App() {
     }
   }, [])
 
-  const openApplication = useCallback(() => setApplicationOpen(true), [])
+  const openApplication = useCallback((selection) => {
+    setApplicationInitialPlan(typeof selection === 'string' ? selection : '')
+    setApplicationOpen(true)
+  }, [])
   const closeApplication = useCallback(() => setApplicationOpen(false), [])
 
   return (
@@ -177,7 +181,11 @@ export default function App() {
         <FinalCta onApply={openApplication} />
       </main>
       <SiteFooter />
-      <ApplicationWizard open={applicationOpen} onClose={closeApplication} />
+      <ApplicationWizard
+        initialPlan={applicationInitialPlan}
+        open={applicationOpen}
+        onClose={closeApplication}
+      />
     </div>
   )
 }

@@ -50,7 +50,7 @@ export function Hero({ onApply }) {
           </p>
           <div className="hero__actions">
             <MagneticButton onClick={onApply} tone="gold">Apply for coaching</MagneticButton>
-            <a href="#coaching" className="hero__text-link">Compare Rx and Rx+</a>
+            <a href="#coaching" className="hero__text-link">Compare coaching options</a>
           </div>
         </motion.div>
       </motion.div>

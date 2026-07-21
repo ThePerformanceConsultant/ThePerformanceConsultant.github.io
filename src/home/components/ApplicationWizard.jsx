@@ -2,7 +2,7 @@ import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { useEffect, useRef, useState } from 'react'
 import { ArrowIcon, CloseIcon } from './Icons.jsx'
 
-const steps = ['Contact', 'Training', 'Fit', 'Confirm']
+const steps = ['Contact', 'Context', 'Focus', 'Confirm']
 const APPLICATION_ENDPOINT = 'https://performance-consultant-studio.vercel.app/api/applications'
 
 const initialValues = {
@@ -13,6 +13,7 @@ const initialValues = {
   goal: '',
   sessions: '',
   trainingHistory: '',
+  nutritionHistory: '',
   desiredOutcome: '',
   plan: '',
   start: '',
@@ -45,7 +46,7 @@ function SelectField({ label, name, value, onChange, children }) {
   )
 }
 
-export function ApplicationWizard({ open, onClose }) {
+export function ApplicationWizard({ open, onClose, initialPlan = '' }) {
   const [step, setStep] = useState(0)
   const [direction, setDirection] = useState(1)
   const [values, setValues] = useState(initialValues)
@@ -71,6 +72,12 @@ export function ApplicationWizard({ open, onClose }) {
   useEffect(() => {
     if (open) window.setTimeout(() => titleRef.current?.focus(), 80)
   }, [open, step])
+
+  useEffect(() => {
+    if (open) {
+      setValues((current) => ({ ...current, plan: initialPlan }))
+    }
+  }, [open, initialPlan])
 
   const change = (event) => {
     const { name, type, checked, value } = event.target
@@ -98,12 +105,17 @@ export function ApplicationWizard({ open, onClose }) {
     setMessage('')
 
     try {
-      await fetch(APPLICATION_ENDPOINT, {
+      const response = await fetch(APPLICATION_ENDPOINT, {
         method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(values),
       })
+      const payload = await response.json().catch(() => ({}))
+
+      if (!response.ok || !payload.ok) {
+        throw new Error(payload.message || 'The application service is not available yet.')
+      }
+
       setSubmitState('success')
     } catch (error) {
       setSubmitState('error')
@@ -152,7 +164,7 @@ export function ApplicationWizard({ open, onClose }) {
     if (step === 1) {
       return (
         <>
-          <p className="application__step-kicker">02 / Goals and training</p>
+          <p className="application__step-kicker">02 / Goals and current context</p>
           <h2 className="application__step-title" id="application-title" ref={titleRef} tabIndex="-1">What needs to change?</h2>
           <p className="application__step-copy">Specific answers make the initial review more useful. There is no need to provide medical information here.</p>
           <div className="application__fields application__fields--two">
@@ -165,6 +177,7 @@ export function ApplicationWizard({ open, onClose }) {
               <option>Other</option>
             </SelectField>
             <SelectField label="Current weekly training" name="sessions" value={values.sessions} onChange={change}>
+              <option>Not currently training</option>
               <option>1 to 2 sessions</option>
               <option>3 sessions</option>
               <option>4 sessions</option>
@@ -176,6 +189,9 @@ export function ApplicationWizard({ open, onClose }) {
           <Field label="Current training structure and experience">
             <textarea name="trainingHistory" value={values.trainingHistory} onChange={change} rows="4" maxLength="1200" required placeholder="What do you train, how is the week organised, and how long have you trained consistently?" />
           </Field>
+          <Field label="Current nutrition structure and tracking experience">
+            <textarea name="nutritionHistory" value={values.nutritionHistory} onChange={change} rows="4" maxLength="1200" required placeholder="How do you currently organise your food intake, and what have you tracked or changed previously?" />
+          </Field>
           <Field label="What outcome would make coaching worthwhile?">
             <textarea name="desiredOutcome" value={values.desiredOutcome} onChange={change} rows="4" maxLength="1200" required placeholder="Describe the result you want and any useful time frame." />
           </Field>
@@ -186,13 +202,14 @@ export function ApplicationWizard({ open, onClose }) {
     if (step === 2) {
       return (
         <>
-          <p className="application__step-kicker">03 / Coaching fit</p>
-          <h2 className="application__step-title" id="application-title" ref={titleRef} tabIndex="-1">Choose the support level.</h2>
+          <p className="application__step-kicker">03 / Coaching focus</p>
+          <h2 className="application__step-title" id="application-title" ref={titleRef} tabIndex="-1">Choose the coaching focus.</h2>
           <p className="application__step-copy">If you are unsure, select guidance. The appropriate service can be discussed after review.</p>
           <div className="application__fields application__fields--two">
             <SelectField label="Preferred service" name="plan" value={values.plan} onChange={change}>
-              <option>Rx, £149 per month</option>
-              <option>Rx+, £250 per month</option>
+              <option>Rx - Nutrition Focus, £149 per month</option>
+              <option>Rx - Training Focus, £149 per month</option>
+              <option>Rx+ - Integrated Training and Nutrition, £250 per month</option>
               <option>Unsure, I would like guidance</option>
             </SelectField>
             <SelectField label="Preferred start" name="start" value={values.start} onChange={change}>
@@ -228,7 +245,7 @@ export function ApplicationWizard({ open, onClose }) {
         <div className="application__consents">
           <label className="check-field">
             <input type="checkbox" name="investment" checked={values.investment} onChange={change} required />
-            <span>I understand that Rx costs £149 per month and Rx+ costs £250 per month.</span>
+            <span>I understand that Rx - Nutrition Focus and Rx - Training Focus each cost £149 per month, and Rx+ costs £250 per month.</span>
           </label>
           <label className="check-field">
             <input type="checkbox" name="privacy" checked={values.privacy} onChange={change} required />
