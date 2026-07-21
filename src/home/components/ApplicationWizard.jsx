@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import { ArrowIcon, CloseIcon } from './Icons.jsx'
 
 const steps = ['Contact', 'Context', 'Focus', 'Confirm']
-const APPLICATION_ENDPOINT = 'https://website-ashy-psi-30.vercel.app/api/applications'
+const APPLICATION_ENDPOINT = 'https://performance-consultant-studio.vercel.app/api/applications'
 
 const initialValues = {
   fullName: '',
