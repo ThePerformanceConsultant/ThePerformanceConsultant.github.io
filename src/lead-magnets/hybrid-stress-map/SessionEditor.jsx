@@ -55,10 +55,12 @@ function validateDraft(session, mode) {
   }
   const runDistance = Number(session.runDistance)
   const longest = Number(session.longestRun30)
-  if (session.runDistance !== '' && (!Number.isFinite(runDistance) || runDistance <= 0)) {
+  const hasRunDistance = session.runDistance !== '' && session.runDistance != null
+  const hasLongestRun = session.longestRun30 !== '' && session.longestRun30 != null
+  if (hasRunDistance && (!Number.isFinite(runDistance) || runDistance <= 0)) {
     errors.runDistance = 'Enter a positive distance.'
   }
-  if (session.longestRun30 !== '' && (!Number.isFinite(longest) || longest <= 0)) {
+  if (hasLongestRun && (!Number.isFinite(longest) || longest <= 0)) {
     errors.longestRun30 = 'Enter a positive distance.'
   }
   if (mode === 'review') {
