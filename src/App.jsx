@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import { ArticleBody } from './components/blog/ArticleBody.jsx'
 import { ArticleGrid } from './components/blog/ArticleGrid.jsx'
 import { ArticleHero } from './components/blog/ArticleHero.jsx'
@@ -17,6 +17,8 @@ import { loadPublicationIndex, loadPublishedArticle } from './sanity.js'
 import HomeApp from './home/HomeApp.jsx'
 
 const PAGE_SIZE = 9
+const STRESS_MAP_PATH = '/tools/hybrid-training-week-stress-map'
+const HybridStressMap = lazy(() => import('./lead-magnets/hybrid-stress-map/HybridStressMap.jsx'))
 
 function useLocation() {
   const read = () => ({
@@ -310,6 +312,27 @@ function Publication({ location }) {
   )
 }
 
+function StressMapRoute() {
+  useEffect(() => {
+    updateMetadata({
+      title: 'The Hybrid Training Week Stress Map',
+      description: 'Map session load, stress fingerprints, goal alignment, progression and recovery context across a hybrid training week.',
+      path: STRESS_MAP_PATH,
+    })
+  }, [])
+
+  return (
+    <Suspense fallback={(
+      <div className="stress-map-route-loading" role="status">
+        <img src="/brand/logo-lockup-light.png" alt="" />
+        <p>Loading the Stress Map</p>
+      </div>
+    )}>
+      <HybridStressMap />
+    </Suspense>
+  )
+}
+
 export default function App() {
   const location = useLocation()
   const path = location.pathname.replace(/\/+$/, '') || '/'
@@ -324,5 +347,6 @@ export default function App() {
   }, [path])
 
   if (path === '/') return <HomeApp />
+  if (path === STRESS_MAP_PATH) return <StressMapRoute />
   return <Publication location={location} />
 }
