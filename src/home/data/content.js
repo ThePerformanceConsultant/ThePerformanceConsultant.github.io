@@ -3,25 +3,25 @@ export const methodSteps = [
     index: '01',
     title: 'Establish',
     signal: 'Context before prescription',
-    copy: 'We define the outcome, then map your training history, schedule, food preferences, recovery and practical constraints.',
+    copy: 'We define your goals, then map your training history, schedule, food preferences, recovery and practical constraints. What do I want to achieve Vs what can I realistically achieve.',
   },
   {
     index: '02',
     title: 'Prescribe',
     signal: 'One coordinated plan',
-    copy: 'The chosen coaching focus is prescribed in full, with training, nutrition and lifestyle considered together so each decision supports the same goal.',
+    copy: 'The chosen coaching focus is prescribed in full, with training, nutrition and lifestyle considered together so each decision supports the same goal whilst minimising friction.',
   },
   {
     index: '03',
     title: 'Review',
     signal: 'Weekly feedback. Focused. Goal-directed.',
-    copy: 'Performance, adherence, appetite, digestion, sleep and recovery are reviewed and modified in context of trends and the bigger picture; no knee jerking at a bad day.',
+    copy: 'Performance, adherence, appetite, digestion, sleep and recovery are reviewed and modified in context of data trends and the bigger picture; no panicking or knee jerking because of a bad day.',
   },
   {
     index: '04',
     title: 'Refine',
-    signal: 'Change what **needs** changing',
-    copy: 'The programme develops as your capacity and circumstances change, with the reasoning behind each decision explained clearly.',
+    signal: 'Change what needs changing',
+    copy: 'The programme develops as your capacity and circumstances change, with the reasoning behind each decision explained clearly. No stress. We adapt.',
   },
 ]
 
