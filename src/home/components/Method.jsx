@@ -34,7 +34,7 @@ export function Method() {
             <SectionLabel index="01" light>How coaching works</SectionLabel>
             <h2>Decisions made from <em>context.</em></h2>
             <p>
-              My coaching process is structured, yet flexible and dynamic. While each phase has a clear purpose, every adjustment must be supported by the available evidence and, most importantly, be compatible with your lifestyle and capabilities.
+              My coaching process is structured, yet flexible and dynamic. Every decision and every adjustment has a clear purpose and must be supported by the available evidence and - most importantly - be compatible with your lifestyle and capabilities. I live and die by highest return of investment and minimal disruption as the one thing you can't get back, is time.
             </p>
             <span className="method__scroll-cue">Scroll to examine the process</span>
           </article>
