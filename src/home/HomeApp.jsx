@@ -78,7 +78,7 @@ function Proposition() {
       </div>
       <div className="proposition__detail">
         <Reveal as="p">
-          Too many put their work ethic to waste thinking "more = better". True coaching coordinates training, food, recovery and your weekly commitments like a symphony - harmonised and seamless, as it should be.
+          Too many put their work ethic to waste thinking "more = better", either with output (training) or discipline (diet). Real coaching coordinates training, food, recovery and lifestyle seamlessly, instead of continually demanding you to give more.
         </Reveal>
         <div className="proposition__facts">
           <Reveal delay={0.05}><strong>4–6</strong><span>training sessions<br />per week</span></Reveal>
