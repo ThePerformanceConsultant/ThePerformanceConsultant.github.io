@@ -82,9 +82,9 @@ export function Testimonials() {
     <section className="testimonials" id="results" aria-labelledby="testimonials-title">
       <div className="testimonials__glow" aria-hidden="true" />
       <header className="testimonials__heading">
-        <Reveal><SectionLabel index="02" light>Client outcomes</SectionLabel></Reveal>
+        <Reveal><SectionLabel index="02" light>Results</SectionLabel></Reveal>
         <Reveal as="h2" delay={0.08}>
-          <span>Client outcomes,</span> in their <em>own words.</em>
+          <span>Client outcomes,</span> in <em>their words.</em>
         </Reveal>
       </header>
 
