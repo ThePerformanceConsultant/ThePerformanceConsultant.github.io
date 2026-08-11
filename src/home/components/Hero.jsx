@@ -80,7 +80,7 @@ export function Hero({ onApply }) {
         animate={{ opacity: 1 }}
         transition={{ delay: 1.2 }}
       >
-        <span>Train</span><i /><span>Fuel</span><i /><span>Review</span>
+        <span>Train</span><i /><span>Fuel</span><i /><span>Recover</span>
       </motion.div>
     </section>
   )
