@@ -11,7 +11,7 @@ export function Faq() {
     <section className="faq" id="questions">
       <div className="faq__heading">
         <Reveal><SectionLabel index="05">Before you apply</SectionLabel></Reveal>
-        <Reveal as="h2" delay={0.08}>Useful detail, without the sales script.</Reveal>
+        <Reveal as="h2" delay={0.08}>Frequently asked questions.</Reveal>
       </div>
       <Reveal className="faq__list" delay={0.12}>
         {faqs.map((item, index) => {
