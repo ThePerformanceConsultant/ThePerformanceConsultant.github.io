@@ -46,7 +46,7 @@ export function Hero({ onApply }) {
           transition={{ duration: 0.8, delay: 0.92 }}
         >
           <p>
-            Individual coaching for everyday athletes who train four to six times per week and want every part of the plan to support the same outcome.
+            Individual coaching for everyday athletes who train four to six times per week and want their plan to work with their lifestyle, not against it.
           </p>
           <div className="hero__actions">
             <MagneticButton onClick={onApply} tone="gold">Apply for coaching</MagneticButton>
