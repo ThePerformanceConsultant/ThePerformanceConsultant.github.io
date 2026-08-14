@@ -219,6 +219,7 @@ export default function AthxGuidance() {
               <div><span>Lower is better</span><code>((Result in seconds − Strong threshold) ÷ Strong threshold) × 100</code><p>Use for MetCon and 5 km time.</p></div>
             </div>
             <p>For example, 420 kg against a 440 kg Strength target is a 4.5% deficit. A 5,050 m result against a 5,300 m Endurance target is a 4.7% deficit. Endurance is therefore the larger limiter.</p>
+            <div className="athx-example"><span>Female Lite example</span><p>A 220 kg Strength total against a 225 kg Strong threshold is a 2.22% deficit. A 16:10 MetCon result, or 970 seconds, against the 12:30 Strong threshold, or 750 seconds, is a 29.33% deficit. MetCon is clearly the larger limiter.</p></div>
             <p>If you do not have a Run:Row result, you can use a 5 km completed within the last four weeks as a proxy. Completing Run:Row under competition standards remains preferable. A capped MetCon is automatically scored as a Limiter.</p>
             <Callout><strong>Keep the same limiter for Weeks 1–4.</strong> Reassess after the Week 4 benchmarks. Do not change it each week according to what felt worst. Performance is what matters, and the work is meant to feel difficult.</Callout>
           </GuidanceSection>
@@ -300,12 +301,14 @@ export default function AthxGuidance() {
               <div><span>Same load, stable effort</span><p>Set 1: 30 kg × 8 at RPE 7<br />Set 2: 30 kg × 7 at RPE 7<br />Set 3: 30 kg × 6 at RPE 7.5</p></div>
             </div>
             <p>Neither approach is inherently better. Use RPE to adjust the load while remaining inside the prescribed repetition range. For accessories, progress repetitions first and add load once every set reaches the upper end at the required effort. For main lifts, reduce the load when the written percentage would breach the RPE or technical cap. Do not add repetitions or increase above the percentage unless the session explicitly requests an autoregulated attempt.</p>
-            <p>RPE is a skill and takes time to learn. Two useful practical cues are:</p>
+            <p>RPE is a skill and takes time to master if you have not used it before, so relax. In 15 years and after coaching thousands of people, about 90% of people have 99 problems, but “training too hard” is not one of them. To date, I know one person who has genuinely overtrained to the point of rhabdomyolysis.</p>
+            <p>The best instinctive guidance I can give for being in the right ballpark is:</p>
             <ol>
               <li>If you complete every set for exactly the same repetitions without a meaningful change in speed or difficulty, you are unlikely to be near RPE 10 and may be at or below RPE 7.</li>
               <li>The point where the load begins to feel as though it is pushing back more than it did earlier in the set is often around RPE 7–8 for many movements.</li>
             </ol>
-            <p>Higher RPE values have a greater recovery cost on large, demanding movements than on small isolation exercises. This is why the prescribed RPE on the main lifts must remain controlled. Being able to do more in Week 1 is irrelevant if accumulated fatigue reduces competition performance later.</p>
+            <p>The more demanding the movement, the greater the recovery cost of higher RPE values. Ten sets of barbell back squats at RPE 10 can leave you needing a lie-down in a dark room and reluctant to go anywhere near the gym the next day. Ten sets of biceps curls are more likely to feel like a good pre-night-out pump.</p>
+            <p>This is why I continually remind you not to push the RPE on the main lifts. You might feel macho in Week 1, but you will not feel so clever by Week 4 when you still have several weeks to go. No one cares whether you “could do more” in the gym if your lifts on competition day are poor.</p>
 
             <h4>Percentage of one-repetition maximum</h4>
             <p>A percentage prescription uses your one-repetition maximum for that lift. If your back squat 1RM is 170 kg and the prescription is 75%, the calculation is:</p>
@@ -328,8 +331,9 @@ export default function AthxGuidance() {
 
             <h3>Balancing strength and conditioning</h3>
             <blockquote>Is it possible to progress maximally in both strength and conditioning at the same time?</blockquote>
-            <p>The simple answer is <strong>no</strong>. Hybrid training requires a deliberate balance between competing adaptations. If both qualities could be maximised without sacrifice, elite endurance athletes would display elite powerlifting strength and elite strongmen would produce world-class marathon performances.</p>
-            <p>The interaction between strength and endurance training is usually discussed through concurrent training and the interference effect. The practical rules are:</p>
+            <p>The simple answer is <strong>no</strong>. That is the point of hybrid training. It is sufficiently difficult that you have to hedge your bets tactically and balance your outputs. If both qualities could be maximised without sacrifice, Hafþór Björnsson would run sub-two-hour marathons and Eliud Kipchoge would deadlift more than three times his bodyweight.</p>
+            <p>There are genetic outliers, such as Ronnie Coleman and Tia-Clair Toomey, who can excel across disciplines better than most people. They are not normal. Basing your ceiling or training capacity on someone else’s genetics is unlikely to serve you well.</p>
+            <p>The physiological interaction is generally discussed through the “interference effect” and “concurrent training”. These terms describe the possible negative impact of one adaptation stimulus on another and the deliberate combination of resistance and endurance training in the same programme. The practical rules are:</p>
             <ul>
               <li><strong>Prioritise what matters most and do it while freshest.</strong> Complete Strict Press before conditioning when pressing is the priority.</li>
               <li><strong>Separate demanding endurance and lifting by at least six hours</strong> where possible.</li>
@@ -339,7 +343,8 @@ export default function AthxGuidance() {
               <li><strong>Fuel the workload,</strong> particularly with sufficient carbohydrate around demanding sessions.</li>
               <li><strong>If performance repeatedly declines, reduce the least important source of fatigue first.</strong> This will often be accessory volume.</li>
             </ul>
-            <p>The programme already considers these interactions, but work, sleep, family and practical demands will sometimes require you to rearrange the week. If the week deteriorates substantially, prioritise your weakness instead of abandoning the plan.</p>
+            <p>The programme already considers these interactions. There will still be weeks where you work late, sleep badly because of a newborn, deal with a heatwave or need to stay home for an engineer. This guidance gives you the knowledge to rearrange your week without discarding the structure that makes it work.</p>
+            <p>If everything goes badly wrong, the obvious solution is not to abandon the entire week. Protect the work that addresses your current weakness and avoid the key sequencing mistakes below.</p>
             <div className="athx-mistakes">
               <article><span>Mistake 01</span><h4>Heavy lifting immediately after hard running</h4><p>Lift first when combining sessions, or separate them by several hours. A short, low-volume acceleration session is different from substantial intervals such as 10 × 800 m.</p></article>
               <article><span>Mistake 02</span><h4>Speed work on very sore legs</h4><p>Easy running on tired legs can be acceptable. Avoid speed or MetCon work when leg soreness is above 3/10 or clearly restricts performance.</p></article>
