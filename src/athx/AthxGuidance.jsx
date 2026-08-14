@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { motion, useReducedMotion } from 'motion/react'
 import { updateMetadata } from '../metadata.js'
 import BonusWorkCalculator from './BonusWorkCalculator.jsx'
 import OneRepMaxCalculator from './OneRepMaxCalculator.jsx'
@@ -71,24 +72,51 @@ const femaleStandards = [
 ]
 
 function GuidanceSection({ number, title, id, children, appendix = false }) {
+  const reduceMotion = useReducedMotion()
+
   return (
-    <section className={`athx-section ${appendix ? 'athx-section--appendix' : ''}`} id={id}>
+    <motion.section
+      className={`athx-section ${appendix ? 'athx-section--appendix' : ''}`}
+      id={id}
+      initial={reduceMotion ? false : { opacity: 0, y: 46 }}
+      whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.08 }}
+      transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+    >
       <div className="athx-section__heading">
         <span>{number}</span>
         <h2>{title}</h2>
       </div>
       <div className="athx-section__content">{children}</div>
-    </section>
+    </motion.section>
   )
 }
 
 function Callout({ children, tone = 'signal' }) {
-  return <aside className={`athx-callout athx-callout--${tone}`}>{children}</aside>
+  const reduceMotion = useReducedMotion()
+  return (
+    <motion.aside
+      className={`athx-callout athx-callout--${tone}`}
+      initial={reduceMotion ? false : { opacity: 0, x: -24 }}
+      whileInView={reduceMotion ? undefined : { opacity: 1, x: 0 }}
+      viewport={{ once: true, amount: 0.35 }}
+      transition={{ duration: 0.52, ease: [0.22, 1, 0.36, 1] }}
+    >
+      {children}
+    </motion.aside>
+  )
 }
 
 function StandardsTable({ title, rows }) {
+  const reduceMotion = useReducedMotion()
   return (
-    <div className="athx-table-shell">
+    <motion.div
+      className="athx-table-shell"
+      initial={reduceMotion ? false : { opacity: 0, y: 24 }}
+      whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+    >
       <table className="athx-table">
         <caption>{title}</caption>
         <thead>
@@ -106,7 +134,7 @@ function StandardsTable({ title, rows }) {
           ))}
         </tbody>
       </table>
-    </div>
+    </motion.div>
   )
 }
 
@@ -115,6 +143,8 @@ function ExternalLink({ href, children }) {
 }
 
 export default function AthxGuidance() {
+  const reduceMotion = useReducedMotion()
+
   useEffect(() => {
     updateMetadata({
       title: 'ATHX Performance Programming Guidance',
@@ -128,19 +158,35 @@ export default function AthxGuidance() {
     <div className="athx-page">
       <header className="athx-hero">
         <div className="athx-hero__grid" aria-hidden="true" />
-        <div className="athx-hero__eyebrow"><span>ATHX</span><i /><p>Client guidance</p></div>
-        <div className="athx-hero__content">
+        <motion.div
+          className="athx-hero__eyebrow"
+          initial={reduceMotion ? false : { opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.55, delay: 0.08 }}
+        ><span>ATHX</span><i /><p>Client guidance</p></motion.div>
+        <motion.div
+          className="athx-hero__content"
+          initial={reduceMotion ? false : { opacity: 0, y: 42 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.82, delay: 0.16, ease: [0.22, 1, 0.36, 1] }}
+        >
           <div>
             <p className="athx-hero__kicker">Performance programming</p>
             <h1><span>Know where</span><em>to start.</em></h1>
           </div>
           <p>How to choose your track, identify your limiter, adjust training and arrive ready to perform.</p>
-        </div>
-        <div className="athx-hero__tracks" aria-label="Programme track sequence">
+        </motion.div>
+        <motion.div
+          className="athx-hero__tracks"
+          aria-label="Programme track sequence"
+          initial={reduceMotion ? false : { opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.65, delay: 0.32, ease: [0.22, 1, 0.36, 1] }}
+        >
           {tracks.map((track, index) => (
             <div key={track.name}><span>{String(index + 1).padStart(2, '0')}</span><strong>{track.name}</strong><small>{track.label}</small></div>
           ))}
-        </div>
+        </motion.div>
       </header>
 
       <div className="athx-document">
@@ -170,7 +216,11 @@ export default function AthxGuidance() {
             <p>Everyone joins at a different point relative to competition, if they have committed to one at all. The four tracks allow you to enter the programme at the appropriate point.</p>
             <div className="athx-track-grid">
               {tracks.map((track, index) => (
-                <article key={track.name}><span>0{index + 1} · {track.label}</span><h3>{track.name}</h3><p>{track.copy}</p></article>
+                <motion.article
+                  key={track.name}
+                  whileHover={reduceMotion ? undefined : { y: -6 }}
+                  transition={{ duration: 0.22 }}
+                ><span>0{index + 1} · {track.label}</span><h3>{track.name}</h3><p>{track.copy}</p></motion.article>
               ))}
             </div>
             <Callout><strong>Always follow the actual week shown on the calendar.</strong> Select the track that matches where you are now.</Callout>

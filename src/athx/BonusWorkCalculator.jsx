@@ -200,16 +200,19 @@ export default function BonusWorkCalculator() {
         </div>
 
         <div className="athx-calculator__inputs">
-          <label>
-            <span><b>Strength</b> total</span>
-            <span className="athx-calculator__field"><input type="number" min="1" step="0.5" inputMode="decimal" value={strength} onChange={update(setStrength)} placeholder="e.g. 420" /> <i>kg</i></span>
-          </label>
+          <div className="athx-calculator__input-card">
+            <label className="athx-calculator__label" htmlFor="bonus-strength"><b>Strength</b> total</label>
+            <div className="athx-calculator__option-space" aria-hidden="true" />
+            <span className="athx-calculator__field"><input id="bonus-strength" type="number" min="1" step="0.5" inputMode="decimal" value={strength} onChange={update(setStrength)} placeholder="e.g. 420" /> <i>kg</i></span>
+          </div>
 
-          <div className="athx-calculator__endurance">
+          <div className="athx-calculator__endurance athx-calculator__input-card">
             <fieldset>
               <legend><b>Endurance</b> test</legend>
-              <label><input type="radio" name="enduranceTest" value="runRow" checked={enduranceTest === 'runRow'} onChange={update(setEnduranceTest)} /> 22-min Run:Row</label>
-              <label><input type="radio" name="enduranceTest" value="fiveKm" checked={enduranceTest === 'fiveKm'} onChange={update(setEnduranceTest)} /> 5 km proxy</label>
+              <div className="athx-calculator__options">
+                <label><input type="radio" name="enduranceTest" value="runRow" checked={enduranceTest === 'runRow'} onChange={update(setEnduranceTest)} /> 22-min Run:Row</label>
+                <label><input type="radio" name="enduranceTest" value="fiveKm" checked={enduranceTest === 'fiveKm'} onChange={update(setEnduranceTest)} /> 5 km proxy</label>
+              </div>
             </fieldset>
             {enduranceTest === 'runRow' ? (
               <label className="athx-calculator__field">
@@ -228,8 +231,9 @@ export default function BonusWorkCalculator() {
             )}
           </div>
 
-          <div className="athx-calculator__metcon">
+          <div className="athx-calculator__metcon athx-calculator__input-card">
             <span className="athx-calculator__label"><b>MetCon</b> · {metconLabel}</span>
+            <div className="athx-calculator__option-space" aria-hidden="true" />
             <TimeFields
               label={`${metconLabel} time`}
               minutes={metconMinutes}
