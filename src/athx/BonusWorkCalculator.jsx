@@ -45,10 +45,14 @@ const standards = {
 
 const labels = ['Limiter', 'Adequate', 'Strong']
 
-function parseTime(value) {
-  const match = value.trim().match(/^(\d{1,3}):([0-5]\d)$/)
-  if (!match) return null
-  return Number(match[1]) * 60 + Number(match[2])
+function parseTime(minutes, seconds) {
+  const minuteValue = Number(minutes)
+  const secondValue = Number(seconds)
+  if (
+    !Number.isInteger(minuteValue) || minuteValue < 0
+    || !Number.isInteger(secondValue) || secondValue < 0 || secondValue > 59
+  ) return null
+  return minuteValue * 60 + secondValue
 }
 
 function scoreHigher(result, threshold) {
@@ -73,13 +77,32 @@ function formatDifference(deficit) {
   return deficit > 0 ? `${amount}% from Strong` : `${amount}% beyond Strong`
 }
 
+function TimeFields({ label, minutes, seconds, onMinutes, onSeconds, disabled = false }) {
+  return (
+    <div className="athx-calculator__time" role="group" aria-label={label}>
+      <label>
+        <span className="sr-only">Minutes</span>
+        <input type="number" min="0" step="1" inputMode="numeric" value={minutes} onChange={onMinutes} placeholder="MM" disabled={disabled} />
+      </label>
+      <b aria-hidden="true">:</b>
+      <label>
+        <span className="sr-only">Seconds</span>
+        <input type="number" min="0" max="59" step="1" inputMode="numeric" value={seconds} onChange={onSeconds} placeholder="SS" disabled={disabled} />
+      </label>
+    </div>
+  )
+}
+
 export default function BonusWorkCalculator() {
   const [sex, setSex] = useState('male')
   const [pathway, setPathway] = useState('intermediate')
   const [enduranceTest, setEnduranceTest] = useState('runRow')
   const [strength, setStrength] = useState('')
   const [endurance, setEndurance] = useState('')
-  const [metcon, setMetcon] = useState('')
+  const [enduranceMinutes, setEnduranceMinutes] = useState('')
+  const [enduranceSeconds, setEnduranceSeconds] = useState('')
+  const [metconMinutes, setMetconMinutes] = useState('')
+  const [metconSeconds, setMetconSeconds] = useState('')
   const [capped, setCapped] = useState(false)
   const [submitted, setSubmitted] = useState(false)
 
@@ -88,14 +111,16 @@ export default function BonusWorkCalculator() {
 
     const selected = standards[sex][pathway]
     const strengthResult = Number(strength)
-    const enduranceResult = enduranceTest === 'runRow' ? Number(endurance) : parseTime(endurance)
-    const metconResult = capped ? null : parseTime(metcon)
+    const enduranceResult = enduranceTest === 'runRow'
+      ? Number(endurance)
+      : parseTime(enduranceMinutes, enduranceSeconds)
+    const metconResult = capped ? null : parseTime(metconMinutes, metconSeconds)
 
     if (
       !Number.isFinite(strengthResult) || strengthResult <= 0
       || !Number.isFinite(enduranceResult) || enduranceResult <= 0
       || (!capped && (!Number.isFinite(metconResult) || metconResult <= 0))
-    ) return { error: 'Enter a valid result for each domain. Times must use MM:SS.' }
+    ) return { error: 'Enter a valid result for each domain. Seconds must be between 0 and 59.' }
 
     const domains = [
       { name: 'Strength', ...scoreHigher(strengthResult, selected.strength) },
@@ -120,7 +145,19 @@ export default function BonusWorkCalculator() {
     ))
 
     return { ranked, weakest: tiedWeakest }
-  }, [capped, endurance, enduranceTest, metcon, pathway, sex, strength, submitted])
+  }, [
+    capped,
+    endurance,
+    enduranceMinutes,
+    enduranceSeconds,
+    enduranceTest,
+    metconMinutes,
+    metconSeconds,
+    pathway,
+    sex,
+    strength,
+    submitted,
+  ])
 
   function update(setter) {
     return (event) => {
@@ -174,25 +211,33 @@ export default function BonusWorkCalculator() {
               <label><input type="radio" name="enduranceTest" value="runRow" checked={enduranceTest === 'runRow'} onChange={update(setEnduranceTest)} /> 22-min Run:Row</label>
               <label><input type="radio" name="enduranceTest" value="fiveKm" checked={enduranceTest === 'fiveKm'} onChange={update(setEnduranceTest)} /> 5 km proxy</label>
             </fieldset>
-            <label className="athx-calculator__field">
-              <span className="sr-only">{enduranceTest === 'runRow' ? 'Run:Row distance in metres' : '5 kilometre time in minutes and seconds'}</span>
-              <input
-                type={enduranceTest === 'runRow' ? 'number' : 'text'}
-                min={enduranceTest === 'runRow' ? '1' : undefined}
-                inputMode={enduranceTest === 'runRow' ? 'numeric' : 'decimal'}
-                value={endurance}
-                onChange={update(setEndurance)}
-                placeholder={enduranceTest === 'runRow' ? 'e.g. 5050' : 'MM:SS'}
+            {enduranceTest === 'runRow' ? (
+              <label className="athx-calculator__field">
+                <span className="sr-only">Run:Row distance in metres</span>
+                <input type="number" min="1" inputMode="numeric" value={endurance} onChange={update(setEndurance)} placeholder="e.g. 5050" />
+                <i>m</i>
+              </label>
+            ) : (
+              <TimeFields
+                label="5 kilometre time"
+                minutes={enduranceMinutes}
+                seconds={enduranceSeconds}
+                onMinutes={update(setEnduranceMinutes)}
+                onSeconds={update(setEnduranceSeconds)}
               />
-              <i>{enduranceTest === 'runRow' ? 'm' : 'min'}</i>
-            </label>
+            )}
           </div>
 
           <div className="athx-calculator__metcon">
-            <label>
-              <span><b>MetCon</b> · {metconLabel}</span>
-              <span className="athx-calculator__field"><input type="text" inputMode="decimal" value={metcon} onChange={update(setMetcon)} placeholder="MM:SS" disabled={capped} /> <i>min</i></span>
-            </label>
+            <span className="athx-calculator__label"><b>MetCon</b> · {metconLabel}</span>
+            <TimeFields
+              label={`${metconLabel} time`}
+              minutes={metconMinutes}
+              seconds={metconSeconds}
+              onMinutes={update(setMetconMinutes)}
+              onSeconds={update(setMetconSeconds)}
+              disabled={capped}
+            />
             <label className="athx-calculator__check"><input type="checkbox" checked={capped} onChange={(event) => { setCapped(event.target.checked); setSubmitted(false) }} /> I did not finish within the cap</label>
           </div>
         </div>
