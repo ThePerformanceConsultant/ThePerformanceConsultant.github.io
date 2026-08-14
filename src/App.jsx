@@ -15,9 +15,11 @@ import { Shell } from './Shell.jsx'
 import { updateMetadata } from './metadata.js'
 import { loadPublicationIndex, loadPublishedArticle } from './sanity.js'
 import HomeApp from './home/HomeApp.jsx'
+import AthxGuidance from './athx/AthxGuidance.jsx'
 
 const PAGE_SIZE = 9
 const STRESS_MAP_PATH = '/tools/hybrid-training-week-stress-map'
+const ATHX_GUIDANCE_PATH = '/athx/guidance'
 const HybridStressMap = lazy(() => import('./lead-magnets/hybrid-stress-map/HybridStressMap.jsx'))
 
 function useLocation() {
@@ -333,6 +335,14 @@ function StressMapRoute() {
   )
 }
 
+function AthxGuidanceRoute() {
+  return (
+    <Shell activeSection="">
+      <AthxGuidance />
+    </Shell>
+  )
+}
+
 export default function App() {
   const location = useLocation()
   const path = location.pathname.replace(/\/+$/, '') || '/'
@@ -348,5 +358,6 @@ export default function App() {
 
   if (path === '/') return <HomeApp />
   if (path === STRESS_MAP_PATH) return <StressMapRoute />
+  if (path === ATHX_GUIDANCE_PATH) return <AthxGuidanceRoute />
   return <Publication location={location} />
 }

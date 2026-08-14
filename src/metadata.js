@@ -17,6 +17,7 @@ export function updateMetadata({
   type = 'website',
   author = '',
   publishedAt = '',
+  robots = 'index, follow',
 } = {}) {
   const fullTitle = title.includes(SITE_NAME) ? title : `${title} | ${SITE_NAME}`
   const canonical = `${window.location.origin}${path}`
@@ -31,6 +32,7 @@ export function updateMetadata({
   setMeta('meta[name="twitter:card"]', { name: 'twitter:card', content: image ? 'summary_large_image' : 'summary' })
   setMeta('meta[name="twitter:title"]', { name: 'twitter:title', content: fullTitle })
   setMeta('meta[name="twitter:description"]', { name: 'twitter:description', content: description })
+  setMeta('meta[name="robots"]', { name: 'robots', content: robots })
 
   if (image) {
     setMeta('meta[property="og:image"]', { property: 'og:image', content: image })

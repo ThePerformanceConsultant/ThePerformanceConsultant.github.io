@@ -20,7 +20,7 @@ function BlogLink({ href, children, ...props }) {
   return <a href={href} onClick={navigate} {...props}>{children}</a>
 }
 
-export function Shell({ children }) {
+export function Shell({ children, activeSection = 'Blog' }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [condensed, setCondensed] = useState(false)
 
@@ -53,7 +53,7 @@ export function Shell({ children }) {
         </a>
         <nav className="header__nav" aria-label="Primary navigation">
           {navigation.map(([label, href]) => (
-            <BlogLink key={href} href={href} className={label === 'Blog' ? 'is-active' : undefined} aria-current={label === 'Blog' ? 'page' : undefined}>
+            <BlogLink key={href} href={href} className={label === activeSection ? 'is-active' : undefined} aria-current={label === activeSection ? 'page' : undefined}>
               {label}
             </BlogLink>
           ))}

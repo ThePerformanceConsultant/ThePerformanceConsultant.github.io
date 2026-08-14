@@ -3,6 +3,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './styles/index.css'
 import './styles/blog.css'
+import './styles/athx.css'
 import './static-host.css'
 import App from './App.jsx'
 

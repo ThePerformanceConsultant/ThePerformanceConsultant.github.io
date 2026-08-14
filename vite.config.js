@@ -9,6 +9,9 @@ const publicOrigin = 'https://theperformanceconsultant.github.io'
 const stressMapRoute = 'tools/hybrid-training-week-stress-map'
 const stressMapTitle = 'The Hybrid Training Week Stress Map | The Performance Consultant'
 const stressMapDescription = 'Map session load, stress fingerprints, goal alignment, progression and recovery context across a hybrid training week.'
+const athxGuidanceRoute = 'athx/guidance'
+const athxGuidanceTitle = 'ATHX Performance Programming Guidance | The Performance Consultant'
+const athxGuidanceDescription = 'Private-link guidance for ATHX performance programming, testing, competition preparation and return to training.'
 
 function escapeHtml(value) {
   return value
@@ -39,6 +42,26 @@ function createStressMapHtml(indexHtml) {
     .replace(/<title>[^<]*<\/title>/, `<title>${escapeHtml(stressMapTitle)}</title>\n    ${meta}`)
 }
 
+function createAthxGuidanceHtml(indexHtml) {
+  const canonical = `${publicOrigin}/${athxGuidanceRoute}`
+  const meta = [
+    '<meta name="robots" content="noindex, nofollow" />',
+    `<link rel="canonical" href="${canonical}" />`,
+    `<meta property="og:title" content="${escapeHtml(athxGuidanceTitle)}" />`,
+    `<meta property="og:description" content="${escapeHtml(athxGuidanceDescription)}" />`,
+    '<meta property="og:type" content="website" />',
+    `<meta property="og:url" content="${canonical}" />`,
+    '<meta name="twitter:card" content="summary" />',
+  ].join('\n    ')
+
+  return indexHtml
+    .replace(
+      /<meta name="description" content="[^"]*" \/>/,
+      `<meta name="description" content="${escapeHtml(athxGuidanceDescription)}" />`,
+    )
+    .replace(/<title>[^<]*<\/title>/, `<title>${escapeHtml(athxGuidanceTitle)}</title>\n    ${meta}`)
+}
+
 function createSitemap(routes) {
   const uniqueRoutes = ['/', ...routes.map((route) => `/${route}`)]
   const entries = uniqueRoutes
@@ -57,26 +80,31 @@ export default defineConfig({
         const content = JSON.parse(
           await fs.readFile(path.resolve(directory, 'src/generated/content.json'), 'utf8'),
         )
-        const routes = [
+        const publicRoutes = [
           'blog',
           stressMapRoute,
           ...(content.articles || []).map(({slug}) => `blog/${slug}`),
           ...(content.categories || []).map(({slug}) => `blog/category/${slug}`),
           ...(content.tags || []).map(({slug}) => `blog/tag/${slug}`),
         ]
+        const routes = [...publicRoutes, athxGuidanceRoute]
 
         await fs.copyFile(indexPath, path.resolve(directory, 'dist/404.html'))
         for (const route of routes) {
           const routeDirectory = path.resolve(directory, 'dist', route)
           await fs.mkdir(routeDirectory, {recursive: true})
-          const routeHtml = route === stressMapRoute ? createStressMapHtml(await fs.readFile(indexPath, 'utf8')) : null
+          const routeHtml = route === stressMapRoute
+            ? createStressMapHtml(await fs.readFile(indexPath, 'utf8'))
+            : route === athxGuidanceRoute
+              ? createAthxGuidanceHtml(await fs.readFile(indexPath, 'utf8'))
+              : null
           if (routeHtml) {
             await fs.writeFile(path.join(routeDirectory, 'index.html'), routeHtml, 'utf8')
           } else {
             await fs.copyFile(indexPath, path.join(routeDirectory, 'index.html'))
           }
         }
-        await fs.writeFile(path.resolve(directory, 'dist/sitemap.xml'), createSitemap(routes), 'utf8')
+        await fs.writeFile(path.resolve(directory, 'dist/sitemap.xml'), createSitemap(publicRoutes), 'utf8')
         await fs.writeFile(
           path.resolve(directory, 'dist/robots.txt'),
           `User-agent: *\nAllow: /\nSitemap: ${publicOrigin}/sitemap.xml\n`,
