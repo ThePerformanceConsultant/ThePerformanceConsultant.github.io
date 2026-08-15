@@ -45,7 +45,7 @@ export default function OneRepMaxCalculator() {
       weight: roundToHalf(estimatedOneRepMax * (maxPercentage / 100)),
     }))
 
-    return { percentage, maximums }
+    return { percentage, estimatedOneRepMax, maximums }
   }, [repetitions, rpe, submitted, weight])
 
   function update(setter) {
@@ -106,14 +106,25 @@ export default function OneRepMaxCalculator() {
         <summary>View the full RPE percentage table</summary>
         <div className="athx-rpe-chart__scroll">
           <table>
-            <caption>Percentage of estimated 1RM by repetitions and RPE</caption>
+            <caption>
+              {estimate?.estimatedOneRepMax
+                ? 'Percentage and calculated load by repetitions and RPE'
+                : 'Percentage of estimated 1RM by repetitions and RPE'}
+            </caption>
             <thead><tr><th scope="col">RPE</th>{Array.from({ length: 12 }, (_, index) => <th scope="col" key={index + 1}>{index + 1}</th>)}</tr></thead>
             <tbody>
               {rpeRows.map((row) => (
                 <tr key={row.rpe}>
                   <th scope="row">{row.rpe}</th>
                   {row.percentages.map((percentage, index) => (
-                    <td style={{ '--rpe-column': index }} key={`${row.rpe}-${index}`}>{percentage.toFixed(1)}%</td>
+                    <td style={{ '--rpe-column': index }} key={`${row.rpe}-${index}`}>
+                      <span>{percentage.toFixed(1)}%</span>
+                      {estimate?.estimatedOneRepMax && (
+                        <strong className="athx-rpe-chart__weight">
+                          {formatWeight(roundToHalf(estimate.estimatedOneRepMax * (percentage / 100)))} kg
+                        </strong>
+                      )}
+                    </td>
                   ))}
                 </tr>
               ))}

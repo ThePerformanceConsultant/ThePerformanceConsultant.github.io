@@ -776,6 +776,14 @@
 .athx-rpe-chart td { padding: 11px 8px; border: 1px solid rgba(17, 19, 21, 0.16); text-align: center; white-space: nowrap; }
 .athx-rpe-chart th { background: #fff; font-weight: 850; }
 .athx-rpe-chart td { background: hsl(calc(4deg + var(--rpe-column) * 9deg) 72% 82%); }
+.athx-rpe-chart__weight {
+  display: block;
+  margin-top: 6px;
+  color: var(--ink);
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: 0.01em;
+}
 
 .athx-countdown { list-style: none; padding: 0 !important; }
 .athx-countdown li { display: grid; grid-template-columns: 76px 1fr; align-items: start; gap: 24px; padding: 25px 0; border-top: 1px solid var(--line-light); }
