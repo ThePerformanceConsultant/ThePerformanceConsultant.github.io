@@ -22,7 +22,7 @@ export function About() {
     <section className="about" id="about">
       <div className="about__identity">
         <Reveal><SectionLabel index="04" light>Your consultant</SectionLabel></Reveal>
-        <Reveal as="h2" delay={0.08}>PhD level knowledge, applied to <em>easy to apply coaching.</em></Reveal>
+        <Reveal as="h2" delay={0.08}>PhD level knowledge, applied to <em>easy to action coaching.</em></Reveal>
         <Reveal as="p" delay={0.14}>
           15 years coaching, 10 years as a molecular biologist, and experience from thousands of clients from 20+ countries inform my practice. The difference is not only is my mission to empower you with scientific precision without the headache... but whoever you are and whatever your goal, if you give me 100%, I'll back you with an extra 20%. Each recommendation is moulded around and adapted to you, your goals and lifestyle demands as they evolve, not the other way around. My ultimate goal is for you to feel like the driver in your story, guided by me.
         </Reveal>
