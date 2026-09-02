@@ -209,7 +209,7 @@ export function ApplicationWizard({ open, onClose, initialPlan = '' }) {
             <SelectField label="Preferred service" name="plan" value={values.plan} onChange={change}>
               <option>Rx - Nutrition Focus, £149 per month</option>
               <option>Rx - Training Focus, £149 per month</option>
-              <option>Rx+ - Integrated Training and Nutrition, £250 per month</option>
+              <option>Rx+ - Integrated Training and Nutrition, £249 per month</option>
               <option>Unsure, I would like guidance</option>
             </SelectField>
             <SelectField label="Preferred start" name="start" value={values.start} onChange={change}>
