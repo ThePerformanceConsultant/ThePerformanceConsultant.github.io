@@ -1,20 +1,39 @@
 'use client'
 
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import {
-  BODY_AREAS,
   DAYS,
   DOMAIN_DEFINITIONS,
-  PROGRESSION_OPTIONS,
-  ROLE_OPTIONS,
-  RPE_GUIDE,
   SESSION_LIBRARY,
-  STRUCTURE_OPTIONS,
-  getRole,
   getSessionType,
 } from './constants.js'
+import {
+  EFFORTS,
+  FRESHNESS,
+  bookingDuration,
+  clock,
+  newPart,
+  parseClock,
+} from './planning-model.js'
+import {
+  changeSessionType,
+  makeAthxParts,
+  parseEquipment,
+  validatePlanningSession,
+} from './editor-model.js'
+import { finishTime } from './PlanningUI.jsx'
+
+const DEMAND_COPY = {
+  lowerForce:
+    'Force through your legs and hips, such as squats, deadlifts or sled pushes.',
+  impact: 'Repeated foot strikes, jumps, landings or lowering under load.',
+  upperGrip: 'Pulling, pressing, carrying or gripping.',
+  metabolic: 'Repeated hard efforts, such as intervals or a demanding circuit.',
+  aerobic: 'Sustained endurance exercise, such as a longer run, ride or row.',
+  freshness: 'Speed, precision or coordination that needs you to be fresh.',
+}
 
 function Field({ label, hint, error, children, className = '' }) {
   return (
@@ -22,101 +41,219 @@ function Field({ label, hint, error, children, className = '' }) {
       <span className="stress-map-field__label">{label}</span>
       {hint ? <span className="stress-map-field__hint">{hint}</span> : null}
       {children}
-      {error ? <span className="stress-map-field__error">{error}</span> : null}
+      {error ? (
+        <span className="stress-map-field__error" role="alert">
+          {error}
+        </span>
+      ) : null}
     </label>
   )
 }
 
-function Toggle({ checked, label, onChange, disabled = false }) {
+function Toggle({ checked, label, onChange }) {
   return (
-    <label className={`stress-map-toggle ${checked ? 'is-selected' : ''} ${disabled ? 'is-disabled' : ''}`}>
-      <input type="checkbox" checked={checked} onChange={onChange} disabled={disabled} />
+    <label className={`stress-map-toggle ${checked ? 'is-selected' : ''}`}>
+      <input type="checkbox" checked={checked} onChange={onChange} />
       <span aria-hidden="true" />
       <b>{label}</b>
     </label>
   )
 }
 
-function validateDraft(session, mode) {
-  const errors = {}
-  if (!session.name?.trim()) errors.name = 'Name this session.'
-  const duration = Number(session.duration)
-  if (!Number.isFinite(duration) || duration < 1 || duration > 360) {
-    errors.duration = 'Enter 1 to 360 minutes.'
-  }
-  const rpe = Number(session.plannedRpe)
-  if (!Number.isFinite(rpe) || rpe < 1 || rpe > 10) {
-    errors.plannedRpe = 'Choose an RPE from 1 to 10.'
-  }
-  if (!session.role) errors.role = 'Choose the role of this session.'
-  if (!session.progression) errors.progression = 'Choose how this session progresses.'
-  if (session.type === 'custom' && !session.fingerprintConfirmed) {
-    errors.fingerprint = 'Confirm that you have reviewed the custom stress fingerprint.'
-  }
-  const runDistance = Number(session.runDistance)
-  const longest = Number(session.longestRun30)
-  const hasRunDistance = session.runDistance !== '' && session.runDistance != null
-  const hasLongestRun = session.longestRun30 !== '' && session.longestRun30 != null
-  if (hasRunDistance && (!Number.isFinite(runDistance) || runDistance <= 0)) {
-    errors.runDistance = 'Enter a positive distance.'
-  }
-  if (hasLongestRun && (!Number.isFinite(longest) || longest <= 0)) {
-    errors.longestRun30 = 'Enter a positive distance.'
-  }
-  if (mode === 'review') {
-    const hasActualDuration = session.actualDuration !== '' && session.actualDuration != null
-    const hasActualRpe = session.actualRpe !== '' && session.actualRpe != null
-    const actualDuration = Number(session.actualDuration)
-    const actualRpe = Number(session.actualRpe)
-    if (hasActualDuration && (!Number.isFinite(actualDuration) || actualDuration < 1 || actualDuration > 360)) {
-      errors.actualDuration = 'Enter 1 to 360 minutes.'
-    }
-    if (hasActualRpe && (!Number.isFinite(actualRpe) || actualRpe < 1 || actualRpe > 10)) {
-      errors.actualRpe = 'Choose an RPE from 1 to 10.'
-    }
-    if (hasActualDuration && !hasActualRpe) errors.actualRpe = 'Enter actual session RPE.'
-    if (hasActualRpe && !hasActualDuration) errors.actualDuration = 'Enter actual duration.'
-    const reviewScores = ['soreness', 'fatigue']
-    reviewScores.forEach((field) => {
-      const value = session.review?.[field]
-      if (value === '' || value == null) return
-      const score = Number(value)
-      if (!Number.isFinite(score) || score < 0 || score > 10) {
-        errors[field] = `Enter ${field} from 0 to 10.`
-      }
-    })
-  }
-  return errors
+function Arrow() {
+  return (
+    <svg
+      aria-hidden="true"
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+    >
+      <path
+        d="M12 4v16m-6-6 6 6 6-6"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
 }
 
-export function SessionEditor({ session, mode, onChange, onClose, onSave }) {
+function TypeField({ value, onChange, label = 'Session type' }) {
+  return (
+    <Field label={label}>
+      <select
+        value={value || 'custom'}
+        onChange={(event) => onChange(event.target.value)}
+      >
+        {SESSION_LIBRARY.map((item) => (
+          <option key={item.value} value={item.value}>
+            {item.label}
+          </option>
+        ))}
+      </select>
+    </Field>
+  )
+}
+
+function EffortField({ value, onChange, label = 'How hard is this session?' }) {
+  return (
+    <Field label={label}>
+      <select
+        value={value || 'unknown'}
+        onChange={(event) => onChange(event.target.value)}
+      >
+        {EFFORTS.map(([key, label]) => (
+          <option key={key} value={key}>
+            {label}
+          </option>
+        ))}
+      </select>
+    </Field>
+  )
+}
+
+function Demands({ value, onChange, part = false }) {
+  const stress = {
+    ...getSessionType(value.type).stress,
+    ...(value.stress || {}),
+  }
+  return (
+    <details className="stress-map-details planner-demand-details">
+      <summary>
+        {part ? 'What this part involves' : 'What the session involves'}
+        {value.fingerprintConfirmed ? ' · Confirmed' : ''}
+      </summary>
+      <p>
+        Select the descriptions that fit. These help explain suggestions
+        involving nearby sessions.
+      </p>
+      <div className="planner-demand-options">
+        {DOMAIN_DEFINITIONS.map((domain) => (
+          <label key={domain.key} className="planner-demand-option">
+            <input
+              type="checkbox"
+              checked={Number(stress[domain.key]) > 0}
+              onChange={(event) =>
+                onChange({
+                  stress: {
+                    ...stress,
+                    [domain.key]: event.target.checked
+                      ? Math.max(
+                          1,
+                          Number(getSessionType(value.type).stress[domain.key]),
+                        )
+                      : 0,
+                  },
+                  fingerprintConfirmed: false,
+                })
+              }
+            />
+            <span>
+              <b>{domain.label}</b>
+              <small>{DEMAND_COPY[domain.key]}</small>
+            </span>
+          </label>
+        ))}
+      </div>
+      <Toggle
+        checked={Boolean(value.fingerprintConfirmed)}
+        label={
+          part
+            ? 'These descriptions match this part'
+            : 'These descriptions match the session'
+        }
+        onChange={(event) =>
+          onChange({ fingerprintConfirmed: event.target.checked })
+        }
+      />
+      <details className="stress-map-details">
+        <summary>Adjust the amount of each demand</summary>
+        <p>
+          Use 0 for none, 1 for a small amount, 2 for moderate and 3 for
+          substantial.
+        </p>
+        <div className="stress-map-fingerprint-editor">
+          {DOMAIN_DEFINITIONS.map((domain) => (
+            <label key={domain.key}>
+              <span>
+                <b>{domain.label}</b>
+              </span>
+              <input
+                type="range"
+                min="0"
+                max="3"
+                step="1"
+                value={stress[domain.key]}
+                onChange={(event) =>
+                  onChange({
+                    stress: {
+                      ...stress,
+                      [domain.key]: Number(event.target.value),
+                    },
+                    fingerprintConfirmed: false,
+                  })
+                }
+                aria-label={`${domain.label} amount`}
+              />
+              <output>{stress[domain.key]}</output>
+            </label>
+          ))}
+        </div>
+      </details>
+    </details>
+  )
+}
+
+export function SessionEditor({
+  session,
+  onChange,
+  onClose,
+  onSave,
+  locations = [],
+  onAddLocation,
+  dayOptions = DAYS,
+  audit = null,
+  editingNote = '',
+}) {
   const [errors, setErrors] = useState({})
+  const [newLocation, setNewLocation] = useState('')
+  const [addingLocation, setAddingLocation] = useState(false)
+  const [equipmentDraft, setEquipmentDraft] = useState('')
+  const [templateConfirmation, setTemplateConfirmation] = useState(false)
   const dialogRef = useRef(null)
   const titleRef = useRef(null)
+  const partsRef = useRef(null)
+  const optionalRef = useRef(null)
   const onCloseRef = useRef(onClose)
   const reduceMotion = useReducedMotion()
-  const type = getSessionType(session?.type)
-  const role = getRole(session?.role)
   const isOpen = Boolean(session)
-  const isRunning = Boolean(type.running || session?.runDistance)
-  const effectiveStress = useMemo(
-    () => ({ ...type.stress, ...(session?.stress || {}) }),
-    [session?.stress, type.stress],
-  )
+  const multipart = Boolean(session?.components?.length)
+  const sessionId = session?.id
 
   useEffect(() => {
     onCloseRef.current = onClose
   }, [onClose])
+  useEffect(() => {
+    setErrors({})
+    setNewLocation('')
+    setAddingLocation(false)
+    setTemplateConfirmation(false)
+    setEquipmentDraft((session?.equipment || []).join(', '))
+  }, [sessionId])
 
   useEffect(() => {
     if (!isOpen) return undefined
     const previousFocus = document.activeElement
     const dialog = dialogRef.current
-    const controls = () => Array.from(
-      dialog?.querySelectorAll('button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled])') || [],
-    )
+    const controls = () =>
+      Array.from(
+        dialog?.querySelectorAll(
+          'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), summary',
+        ) || [],
+      ).filter((item) => item.getClientRects().length)
     titleRef.current?.focus()
-
     const handleKeyDown = (event) => {
       if (event.key === 'Escape') {
         event.preventDefault()
@@ -128,7 +265,11 @@ export function SessionEditor({ session, mode, onChange, onClose, onSave }) {
       if (!items.length) return
       const first = items[0]
       const last = items.at(-1)
-      if (event.shiftKey && document.activeElement === first) {
+      if (
+        event.shiftKey &&
+        (document.activeElement === first ||
+          document.activeElement === titleRef.current)
+      ) {
         event.preventDefault()
         last.focus()
       } else if (!event.shiftKey && document.activeElement === last) {
@@ -136,7 +277,6 @@ export function SessionEditor({ session, mode, onChange, onClose, onSave }) {
         first.focus()
       }
     }
-
     document.addEventListener('keydown', handleKeyDown)
     document.body.classList.add('stress-map-dialog-open')
     return () => {
@@ -147,51 +287,111 @@ export function SessionEditor({ session, mode, onChange, onClose, onSave }) {
   }, [isOpen])
 
   const update = (patch) => onChange({ ...session, ...patch })
-  const updateReview = (patch) => update({ review: { ...session.review, ...patch } })
-  const updateArray = (key, value, checked) => {
-    const current = new Set(session[key] || [])
-    if (checked) current.add(value)
-    else current.delete(value)
-    update({ [key]: [...current] })
-  }
-
-  const changeType = (value) => {
-    const previousType = getSessionType(session.type)
-    const nextType = getSessionType(value)
-    const nameWasDefault = !session.name?.trim() || session.name === previousType.label
+  const updateParts = (components, patch = {}) =>
     update({
-      type: value,
-      name: nameWasDefault ? nextType.label : session.name,
-      stress: { ...nextType.stress },
-      fingerprintConfirmed: !nextType.custom,
+      components,
+      ...patch,
+      duration: bookingDuration({ ...session, ...patch, components }),
     })
-    setErrors((current) => ({ ...current, fingerprint: undefined }))
+  const updatePart = (index, patch) =>
+    updateParts(
+      session.components.map((part, position) =>
+        position === index ? { ...part, ...patch } : part,
+      ),
+    )
+  const jumpToParts = () => {
+    if (!multipart)
+      updateParts([
+        newPart({
+          name: session.exercises?.trim() ? session.name : '',
+          type: session.type,
+          duration: session.duration || 15,
+          effort: session.effort,
+          exercises: session.exercises,
+          stress: { ...session.stress },
+          fingerprintConfirmed: session.fingerprintConfirmed,
+        }),
+      ])
+    requestAnimationFrame(() => {
+      partsRef.current?.scrollIntoView({
+        behavior: reduceMotion ? 'auto' : 'smooth',
+        block: 'start',
+      })
+      partsRef.current?.focus({ preventScroll: true })
+    })
   }
-
+  const useTemplate = () => {
+    updateParts(makeAthxParts(), { startDelay: 0 })
+    setTemplateConfirmation(false)
+    requestAnimationFrame(() =>
+      partsRef.current?.focus({ preventScroll: true }),
+    )
+  }
   const save = () => {
-    const nextErrors = validateDraft(session, mode)
+    const nextErrors = validatePlanningSession(session)
+    if (finishError) nextErrors.startTime = finishError
     setErrors(nextErrors)
     if (Object.keys(nextErrors).length) {
-      requestAnimationFrame(() => dialogRef.current?.querySelector('[aria-invalid="true"]')?.focus())
+      if (
+        [
+          'plannedRpe',
+          'actualRpe',
+          'actualDuration',
+          'runDistance',
+          'longestRun30',
+        ].some((key) => nextErrors[key])
+      )
+        optionalRef.current.open = true
+      requestAnimationFrame(() => {
+        const field = dialogRef.current?.querySelector('[aria-invalid="true"]')
+        field?.focus()
+        field?.scrollIntoView({ block: 'center' })
+      })
       return
     }
     onSave()
   }
-
-  const loadPreview = useMemo(
-    () => Math.max(0, Number(session?.duration) || 0) * Math.max(0, Number(session?.plannedRpe) || 0),
-    [session?.duration, session?.plannedRpe],
-  )
+  const addLocation = () => {
+    const location = newLocation.trim()
+    if (!location) return
+    onAddLocation?.(location)
+    update({ location })
+    setNewLocation('')
+    setAddingLocation(false)
+  }
+  const knownLocations = [
+    ...new Set([...locations, session?.location].filter(Boolean)),
+  ]
+  const duration = session ? bookingDuration(session) : 0
+  const start = parseClock(session?.startTime)
+  let calculatedFinish = null
+  let finishError = ''
+  if (audit && session && Number.isFinite(start) && Number.isFinite(duration)) {
+    try {
+      calculatedFinish = finishTime(audit, session)
+    } catch (error) {
+      finishError = error.message || 'Check the date and start time.'
+    }
+  }
+  const finish = finishError
+    ? ''
+    : (calculatedFinish?.endTime ??
+      (Number.isFinite(start) && Number.isFinite(duration)
+        ? clock(start + duration)
+        : ''))
+  const finishNextDay =
+    calculatedFinish?.nextDay ??
+    (Number.isFinite(start) && start + duration >= 1440)
 
   return (
     <AnimatePresence>
       {session ? (
         <motion.div
           className="stress-map-editor-backdrop"
-          initial={reduceMotion ? { opacity: 0 } : { opacity: 0 }}
+          initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: reduceMotion ? 0 : 0.22 }}
+          transition={{ duration: reduceMotion ? 0 : 0.2 }}
           onMouseDown={(event) => {
             if (event.target === event.currentTarget) onClose()
           }}
@@ -205,7 +405,7 @@ export function SessionEditor({ session, mode, onChange, onClose, onSave }) {
             initial={reduceMotion ? { opacity: 0 } : { x: '100%' }}
             animate={reduceMotion ? { opacity: 1 } : { x: 0 }}
             exit={reduceMotion ? { opacity: 0 } : { x: '100%' }}
-            transition={{ duration: reduceMotion ? 0 : 0.48, ease: [0.76, 0, 0.24, 1] }}
+            transition={{ duration: reduceMotion ? 0 : 0.3 }}
           >
             <header className="stress-map-editor__header">
               <div>
@@ -214,392 +414,657 @@ export function SessionEditor({ session, mode, onChange, onClose, onSave }) {
                   {session.name || 'New session'}
                 </h2>
               </div>
-              <button type="button" className="stress-map-icon-button" onClick={onClose} aria-label="Close session editor">
-                <span aria-hidden="true">×</span>
+              <button
+                type="button"
+                className="stress-map-icon-button"
+                onClick={onClose}
+                aria-label="Close session editor"
+              >
+                <svg
+                  aria-hidden="true"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                >
+                  <path
+                    d="m6 6 12 12M18 6 6 18"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                  />
+                </svg>
               </button>
             </header>
-
-            <div className="stress-map-editor__load" aria-label={`Planned session load ${Math.round(loadPreview)} arbitrary units`}>
-              <span>Planned load</span>
-              <strong>{Math.round(loadPreview).toLocaleString('en-GB')}</strong>
-              <small>Duration × session RPE. Used only within your own week.</small>
-            </div>
-
             <div className="stress-map-editor__body">
+              {editingNote && (
+                <p className="planner-multipart-callout" role="status">
+                  {editingNote}
+                </p>
+              )}
               <section className="stress-map-form-section">
-                <div className="stress-map-form-section__title">
-                  <span>01</span>
-                  <div>
-                    <h3>Place and purpose</h3>
-                    <p>What is the session, when does it happen, and which goal does it serve?</p>
-                  </div>
-                </div>
-
-                <div className="stress-map-field-grid stress-map-field-grid--three">
-                  <Field label="Day">
-                    <select value={session.day} onChange={(event) => update({ day: Number(event.target.value) })}>
-                      {DAYS.map((day) => <option key={day.value} value={day.value}>{day.label}</option>)}
-                    </select>
-                  </Field>
-                  <Field label="Start time">
-                    <input type="time" value={session.startTime} onChange={(event) => update({ startTime: event.target.value })} />
-                  </Field>
-                  <Field label="Fixed or movable">
-                    <select value={session.mobility} onChange={(event) => update({ mobility: event.target.value })}>
-                      <option value="movable">Movable</option>
-                      <option value="fixed">Fixed</option>
-                    </select>
-                  </Field>
-                </div>
-
-                <Field label="Order when sessions share the same start time" hint="0 runs before 1, then 2">
+                <Field
+                  label="Session name"
+                  hint="Use a specific name so you recognise it in your calendar, such as ‘Deadlifts and split squats’ or ‘6 × 3-minute run intervals’."
+                  error={errors.name}
+                >
                   <input
-                    type="number"
-                    min="0"
-                    step="1"
-                    inputMode="numeric"
-                    value={session.sequenceAtSameTime ?? 0}
-                    onChange={(event) => update({ sequenceAtSameTime: event.target.value })}
-                  />
-                </Field>
-
-                <Field label="Session type">
-                  <select value={session.type} onChange={(event) => changeType(event.target.value)}>
-                    {SESSION_LIBRARY.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
-                  </select>
-                </Field>
-
-                <Field label="Session name" error={errors.name}>
-                  <input
-                    value={session.name}
+                    value={session.name || ''}
                     onChange={(event) => update({ name: event.target.value })}
                     aria-invalid={Boolean(errors.name)}
+                    autoComplete="off"
                   />
                 </Field>
-
                 <div className="stress-map-field-grid">
-                  <Field label="Duration" hint="Minutes" error={errors.duration}>
-                    <input
-                      type="number"
-                      min="1"
-                      max="360"
-                      inputMode="numeric"
-                      value={session.duration}
-                      onChange={(event) => update({ duration: event.target.value })}
-                      aria-invalid={Boolean(errors.duration)}
-                    />
-                  </Field>
-                  <Field label="Expected session RPE" hint="Overall session, 1 to 10" error={errors.plannedRpe}>
-                    <input
-                      type="number"
-                      min="1"
-                      max="10"
-                      inputMode="numeric"
-                      value={session.plannedRpe}
-                      onChange={(event) => update({ plannedRpe: event.target.value })}
-                      aria-invalid={Boolean(errors.plannedRpe)}
-                    />
-                  </Field>
-                </div>
-
-                <details className="stress-map-details">
-                  <summary>Session-RPE guide</summary>
-                  <div className="stress-map-rpe-guide">
-                    {RPE_GUIDE.map(([score, label]) => <span key={score}><b>{score}</b>{label}</span>)}
-                  </div>
-                </details>
-
-                <fieldset className="stress-map-choice-field" aria-invalid={Boolean(errors.role)}>
-                  <legend>Goal alignment</legend>
-                  <p>One role determines the alignment score. Priority 1 work only scores 3 when it directly develops that outcome.</p>
-                  <div className="stress-map-choice-grid">
-                    {ROLE_OPTIONS.map((item) => (
-                      <label key={item.value} className={session.role === item.value ? 'is-selected' : ''}>
-                        <input
-                          type="radio"
-                          name={`role-${session.id}`}
-                          value={item.value}
-                          checked={session.role === item.value}
-                          onChange={() => update({ role: item.value })}
-                        />
-                        <span>{item.score}</span>
-                        <b>{item.label}</b>
-                        <small>{item.description}</small>
-                      </label>
-                    ))}
-                  </div>
-                  {errors.role ? <span className="stress-map-field__error">{errors.role}</span> : null}
-                </fieldset>
-
-                <div className="stress-map-alignment-readout">
-                  <span>Alignment</span>
-                  <strong>{role.score}</strong>
-                  <p>{role.label}</p>
-                </div>
-
-                <fieldset className="stress-map-choice-field" aria-invalid={Boolean(errors.progression)}>
-                  <legend>Is progression defined?</legend>
-                  <div className="stress-map-choice-grid stress-map-choice-grid--three">
-                    {PROGRESSION_OPTIONS.map((item) => (
-                      <label key={item.value} className={session.progression === item.value ? 'is-selected' : ''}>
-                        <input
-                          type="radio"
-                          name={`progression-${session.id}`}
-                          value={item.value}
-                          checked={session.progression === item.value}
-                          onChange={() => update({ progression: item.value })}
-                        />
-                        <b>{item.label}</b>
-                        <small>{item.description}</small>
-                      </label>
-                    ))}
-                  </div>
-                  {errors.progression ? <span className="stress-map-field__error">{errors.progression}</span> : null}
-                </fieldset>
-              </section>
-
-              <section className="stress-map-form-section">
-                <div className="stress-map-form-section__title">
-                  <span>02</span>
-                  <div>
-                    <h3>Stress fingerprint</h3>
-                    <p>The library provides a starting point. Adjust it when the actual session differs.</p>
-                  </div>
-                </div>
-
-                <div className="stress-map-fingerprint-editor">
-                  {DOMAIN_DEFINITIONS.map((domain) => (
-                    <label key={domain.key}>
-                      <span>
-                        <b>{domain.label}</b>
-                        <small>{domain.description}</small>
-                      </span>
-                      <input
-                        type="range"
-                        min="0"
-                        max="3"
-                        step="1"
-                        value={effectiveStress[domain.key]}
-                        onChange={(event) => update({
-                          stress: { ...effectiveStress, [domain.key]: Number(event.target.value) },
-                        })}
-                        aria-label={`${domain.label} stress score`}
-                      />
-                      <output>{effectiveStress[domain.key]}</output>
-                    </label>
-                  ))}
-                </div>
-
-                {session.type === 'custom' ? (
-                  <div>
-                    <Toggle
-                      checked={Boolean(session.fingerprintConfirmed)}
-                      label="I have reviewed these six scores"
-                      onChange={(event) => update({ fingerprintConfirmed: event.target.checked })}
-                    />
-                    {errors.fingerprint ? <span className="stress-map-field__error">{errors.fingerprint}</span> : null}
-                  </div>
-                ) : null}
-
-                <Field label="Within-session sequence" hint="Relevant when technical or power work and conditioning share a session">
-                  <select value={session.structure} onChange={(event) => update({ structure: event.target.value })}>
-                    {STRUCTURE_OPTIONS.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
-                  </select>
-                </Field>
-              </section>
-
-              <section className="stress-map-form-section">
-                <div className="stress-map-form-section__title">
-                  <span>03</span>
-                  <div>
-                    <h3>Exposure and flexibility</h3>
-                    <p>These tags help identify repeated local exposure. They do not assign injury probability.</p>
-                  </div>
-                </div>
-
-                <fieldset className="stress-map-toggle-field">
-                  <legend>Body areas substantially exposed</legend>
-                  <div className="stress-map-toggle-grid">
-                    {BODY_AREAS.map((area) => (
-                      <Toggle
-                        key={area}
-                        checked={(session.bodyAreas || []).includes(area)}
-                        label={area}
-                        onChange={(event) => updateArray('bodyAreas', area, event.target.checked)}
-                      />
-                    ))}
-                  </div>
-                </fieldset>
-
-                {session.mobility === 'movable' ? (
-                  <fieldset className="stress-map-toggle-field">
-                    <legend>Feasible alternative days</legend>
-                    <p>The tool will only suggest a move to a day you mark as feasible.</p>
-                    <div className="stress-map-toggle-grid stress-map-toggle-grid--days">
-                      {DAYS.map((day) => (
-                        <Toggle
-                          key={day.value}
-                          checked={(session.availableDays || []).includes(day.value)}
-                          label={day.short}
-                          disabled={Number(session.day) === day.value}
-                          onChange={(event) => updateArray('availableDays', day.value, event.target.checked)}
-                        />
+                  <Field label="Day" error={errors.day}>
+                    <select
+                      value={session.day}
+                      onChange={(event) =>
+                        update({ day: Number(event.target.value) })
+                      }
+                      aria-invalid={Boolean(errors.day)}
+                    >
+                      {dayOptions.map((day) => (
+                        <option key={day.value} value={day.value}>
+                          {day.label}
+                        </option>
                       ))}
-                    </div>
-                  </fieldset>
-                ) : null}
-
-                {isRunning ? (
-                  <div className="stress-map-run-fields">
-                    <div className="stress-map-run-fields__intro">
-                      <span>Running-distance context</span>
-                      <p>The warning is specific to one run and recent distance exposure. It is not a weekly workload ratio.</p>
-                    </div>
-                    <div className="stress-map-field-grid">
-                      <Field label="Planned run distance" hint="Use the same unit for both fields" error={errors.runDistance}>
-                        <input
-                          type="number"
-                          min="0"
-                          step="0.1"
-                          inputMode="decimal"
-                          value={session.runDistance}
-                          onChange={(event) => update({ runDistance: event.target.value })}
-                          aria-invalid={Boolean(errors.runDistance)}
-                        />
-                      </Field>
-                      <Field label="Longest run in previous 30 days" error={errors.longestRun30}>
-                        <input
-                          type="number"
-                          min="0"
-                          step="0.1"
-                          inputMode="decimal"
-                          value={session.longestRun30}
-                          onChange={(event) => update({ longestRun30: event.target.value })}
-                          aria-invalid={Boolean(errors.longestRun30)}
-                        />
-                      </Field>
-                    </div>
-                  </div>
-                ) : null}
-              </section>
-
-              {mode === 'review' ? (
-                <section className="stress-map-form-section stress-map-form-section--review">
-                  <div className="stress-map-form-section__title">
-                    <span>04</span>
-                    <div>
-                      <h3>Review the completed session</h3>
-                      <p>Record the overall RPE approximately 20 to 30 minutes after the session.</p>
-                    </div>
-                  </div>
-
-                  <div className="stress-map-field-grid">
-                    <Field label="Actual duration" hint="Minutes" error={errors.actualDuration}>
-                      <input
-                        type="number"
-                        min="1"
-                        max="360"
-                        inputMode="numeric"
-                        value={session.actualDuration}
-                        onChange={(event) => update({ actualDuration: event.target.value })}
-                        aria-invalid={Boolean(errors.actualDuration)}
-                      />
-                    </Field>
-                    <Field label="Actual session RPE" hint="1 to 10" error={errors.actualRpe}>
-                      <input
-                        type="number"
-                        min="1"
-                        max="10"
-                        inputMode="numeric"
-                        value={session.actualRpe}
-                        onChange={(event) => update({ actualRpe: event.target.value })}
-                        aria-invalid={Boolean(errors.actualRpe)}
-                      />
-                    </Field>
-                  </div>
-
-                  <div className="stress-map-field-grid">
-                    <Field label="Completed as planned">
-                      <select value={session.review?.completion || ''} onChange={(event) => updateReview({ completion: event.target.value })}>
-                        <option value="">Choose</option>
-                        <option value="yes">Yes</option>
-                        <option value="partly">Partly</option>
-                        <option value="no">No</option>
-                      </select>
-                    </Field>
-                    <Field label="Performance relative to target">
-                      <select value={session.review?.performance || ''} onChange={(event) => updateReview({ performance: event.target.value })}>
-                        <option value="">Choose</option>
-                        <option value="better">Better</option>
-                        <option value="expected">Expected</option>
-                        <option value="worse">Worse</option>
-                      </select>
-                    </Field>
-                  </div>
-
-                  <div className="stress-map-field-grid">
-                    <Field label="Local soreness at next session" hint="0 to 10" error={errors.soreness}>
-                      <input
-                        type="number"
-                        min="0"
-                        max="10"
-                        inputMode="numeric"
-                        value={session.review?.soreness ?? ''}
-                        onChange={(event) => updateReview({ soreness: event.target.value })}
-                        aria-invalid={Boolean(errors.soreness)}
-                      />
-                    </Field>
-                    <Field label="General fatigue at next session" hint="0 to 10" error={errors.fatigue}>
-                      <input
-                        type="number"
-                        min="0"
-                        max="10"
-                        inputMode="numeric"
-                        value={session.review?.fatigue ?? ''}
-                        onChange={(event) => updateReview({ fatigue: event.target.value })}
-                        aria-invalid={Boolean(errors.fatigue)}
-                      />
-                    </Field>
-                  </div>
-
-                  <Field label="Reason for deviation">
-                    <select value={session.review?.deviationReason || ''} onChange={(event) => updateReview({ deviationReason: event.target.value })}>
-                      <option value="">No deviation or choose a reason</option>
-                      <option value="time">Time</option>
-                      <option value="fatigue">Fatigue</option>
-                      <option value="pain">Pain</option>
-                      <option value="class-content">Class content</option>
-                      <option value="motivation">Motivation</option>
-                      <option value="other">Other</option>
                     </select>
                   </Field>
-
-                  <Toggle
-                    checked={Boolean(session.review?.painChangesMovement)}
-                    label="Pain changed how I moved or trained"
-                    onChange={(event) => updateReview({ painChangesMovement: event.target.checked })}
+                  <Field label="Start time" error={errors.startTime}>
+                    <input
+                      type="time"
+                      value={session.startTime || ''}
+                      onChange={(event) =>
+                        update({ startTime: event.target.value })
+                      }
+                      aria-invalid={Boolean(errors.startTime)}
+                    />
+                  </Field>
+                </div>
+                <Toggle
+                  checked={Boolean(session.priority)}
+                  label="This is a priority session"
+                  onChange={(event) =>
+                    update({ priority: event.target.checked })
+                  }
+                />
+                <Field
+                  label="What can change?"
+                  hint="A flexible priority session can move to another available time."
+                >
+                  <select
+                    value={session.mobility || 'movable'}
+                    onChange={(event) =>
+                      update({ mobility: event.target.value })
+                    }
+                  >
+                    <option value="movable">This session is flexible</option>
+                    <option value="fixed">The day and time are fixed</option>
+                  </select>
+                </Field>
+                <Field
+                  label="Place"
+                  hint="Choose the same place when adding available times. For example, select ‘City Gym’ for both this session and a free slot at that gym."
+                >
+                  <select
+                    value={session.location || ''}
+                    onChange={(event) =>
+                      update({ location: event.target.value })
+                    }
+                  >
+                    <option value="">No specific place needed</option>
+                    {knownLocations.map((location) => (
+                      <option key={location} value={location}>
+                        {location}
+                      </option>
+                    ))}
+                  </select>
+                </Field>
+                {addingLocation ? (
+                  <div className="planner-inline-add">
+                    <Field label="New place">
+                      <input
+                        value={newLocation}
+                        onChange={(event) => setNewLocation(event.target.value)}
+                        placeholder="City Gym"
+                      />
+                    </Field>
+                    <button
+                      type="button"
+                      className="stress-map-button stress-map-button--ghost"
+                      disabled={!newLocation.trim()}
+                      onClick={addLocation}
+                    >
+                      Add place
+                    </button>
+                    <button
+                      type="button"
+                      className="stress-map-button stress-map-button--ghost"
+                      onClick={() => setAddingLocation(false)}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    className="stress-map-button stress-map-button--ghost"
+                    onClick={() => setAddingLocation(true)}
+                  >
+                    Add a place
+                  </button>
+                )}
+                <Field
+                  label="Equipment needed"
+                  hint="Optional. Separate items with commas, for example barbell, rower."
+                >
+                  <input
+                    value={equipmentDraft}
+                    onChange={(event) => {
+                      setEquipmentDraft(event.target.value)
+                      update({ equipment: parseEquipment(event.target.value) })
+                    }}
                   />
-                  {session.review?.painChangesMovement ? (
-                    <p className="stress-map-clinical-note">
-                      Pain that changes movement, worsens, or includes neurological symptoms requires appropriate assessment rather than a higher spreadsheet score.
+                </Field>
+              </section>
+
+              <div className="planner-multipart-callout">
+                <p>
+                  If your session has multiple parts, such as ATHX, enter each
+                  part in the section below.
+                </p>
+                <button
+                  type="button"
+                  className="stress-map-button stress-map-button--ghost"
+                  onClick={jumpToParts}
+                >
+                  {multipart
+                    ? 'Go to separate parts'
+                    : 'Add a session with separate parts'}{' '}
+                  <Arrow />
+                </button>
+              </div>
+
+              {!multipart ? (
+                <section className="stress-map-form-section">
+                  <TypeField
+                    value={session.type}
+                    onChange={(type) =>
+                      onChange(changeSessionType(session, type))
+                    }
+                  />
+                  <div className="stress-map-field-grid">
+                    <Field
+                      label="Duration"
+                      hint="Minutes, including breaks"
+                      error={errors.duration}
+                    >
+                      <input
+                        type="number"
+                        min="1"
+                        max="1440"
+                        step="1"
+                        inputMode="numeric"
+                        value={session.duration ?? ''}
+                        onChange={(event) =>
+                          update({ duration: event.target.value })
+                        }
+                        aria-invalid={Boolean(errors.duration)}
+                      />
+                    </Field>
+                    <EffortField
+                      value={session.effort}
+                      onChange={(effort) => update({ effort })}
+                    />
+                  </div>
+                  <Field
+                    label="Exercises or session content"
+                    hint="Leave this blank if doing a class and you don’t know what’s in it."
+                  >
+                    <textarea
+                      rows="3"
+                      value={session.exercises || ''}
+                      onChange={(event) =>
+                        update({
+                          exercises: event.target.value,
+                          fingerprintConfirmed: false,
+                        })
+                      }
+                    />
+                  </Field>
+                  <Demands value={session} onChange={update} />
+                </section>
+              ) : null}
+
+              <Field label="Do you need to be fresh for this session?">
+                <select
+                  value={session.freshness || 'unknown'}
+                  onChange={(event) =>
+                    update({ freshness: event.target.value })
+                  }
+                >
+                  {FRESHNESS.map(([key, label]) => (
+                    <option key={key} value={key}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+
+              {multipart ? (
+                <section className="stress-map-form-section planner-parts-section">
+                  <h3 ref={partsRef} tabIndex="-1">
+                    Separate parts and breaks
+                  </h3>
+                  <p>
+                    Enter each part in order. Factor in any breaks you take
+                    within a session, if needed.
+                  </p>
+                  <p>
+                    Use the ATHX template for a representative training example,
+                    then edit the parts, durations and breaks to match your
+                    session.
+                  </p>
+                  {templateConfirmation ? (
+                    <div
+                      className="planner-multipart-callout"
+                      role="group"
+                      aria-label="Replace separate parts"
+                    >
+                      <p>
+                        Replace the parts entered here with the ATHX example?
+                      </p>
+                      <button
+                        type="button"
+                        className="stress-map-button stress-map-button--ghost"
+                        onClick={useTemplate}
+                      >
+                        Replace parts with template
+                      </button>
+                      <button
+                        type="button"
+                        className="stress-map-button stress-map-button--ghost"
+                        onClick={() => setTemplateConfirmation(false)}
+                      >
+                        Keep current parts
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      className="stress-map-button stress-map-button--ghost"
+                      onClick={() => {
+                        if (
+                          session.components.some(
+                            (part) =>
+                              part.name?.trim() || part.exercises?.trim(),
+                          )
+                        )
+                          setTemplateConfirmation(true)
+                        else useTemplate()
+                      }}
+                    >
+                      Use ATHX template
+                    </button>
+                  )}
+                  <Field
+                    label="Time before the first part"
+                    hint="Minutes. Include a warm-up here if you have not added it as a separate part."
+                    error={errors.startDelay}
+                  >
+                    <input
+                      type="number"
+                      min="0"
+                      max="1440"
+                      step="1"
+                      inputMode="numeric"
+                      value={session.startDelay ?? 0}
+                      onChange={(event) =>
+                        updateParts(session.components, {
+                          startDelay: event.target.value,
+                        })
+                      }
+                      aria-invalid={Boolean(errors.startDelay)}
+                    />
+                  </Field>
+                  {session.components.map((part, index) => (
+                    <fieldset key={part.id} className="planner-part-card">
+                      <legend>Part {index + 1}</legend>
+                      <Field
+                        label="Part name"
+                        error={errors[`part-${index}-name`]}
+                      >
+                        <input
+                          value={part.name || ''}
+                          onChange={(event) =>
+                            updatePart(index, { name: event.target.value })
+                          }
+                          aria-invalid={Boolean(errors[`part-${index}-name`])}
+                        />
+                      </Field>
+                      <TypeField
+                        value={part.type}
+                        onChange={(type) =>
+                          updatePart(index, changeSessionType(part, type))
+                        }
+                        label="Type of exercise"
+                      />
+                      <div className="stress-map-field-grid">
+                        <Field
+                          label="Part duration"
+                          hint="Minutes"
+                          error={errors[`part-${index}-duration`]}
+                        >
+                          <input
+                            type="number"
+                            min="1"
+                            max="1440"
+                            step="1"
+                            inputMode="numeric"
+                            value={part.duration ?? ''}
+                            onChange={(event) =>
+                              updatePart(index, {
+                                duration: event.target.value,
+                              })
+                            }
+                            aria-invalid={Boolean(
+                              errors[`part-${index}-duration`],
+                            )}
+                          />
+                        </Field>
+                        <Field
+                          label="Break after this part"
+                          hint="Minutes"
+                          error={errors[`part-${index}-breakAfter`]}
+                        >
+                          <input
+                            type="number"
+                            min="0"
+                            max="1440"
+                            step="1"
+                            inputMode="numeric"
+                            value={part.breakAfter ?? 0}
+                            onChange={(event) =>
+                              updatePart(index, {
+                                breakAfter: event.target.value,
+                              })
+                            }
+                            aria-invalid={Boolean(
+                              errors[`part-${index}-breakAfter`],
+                            )}
+                          />
+                        </Field>
+                      </div>
+                      <EffortField
+                        value={part.effort}
+                        onChange={(effort) => updatePart(index, { effort })}
+                        label="How hard is this part?"
+                      />
+                      <Field
+                        label="Exercises in this part"
+                        hint="Leave this blank if doing a class and you don’t know what’s in it."
+                      >
+                        <textarea
+                          rows="2"
+                          value={part.exercises || ''}
+                          onChange={(event) =>
+                            updatePart(index, {
+                              exercises: event.target.value,
+                              fingerprintConfirmed: false,
+                            })
+                          }
+                        />
+                      </Field>
+                      <Demands
+                        value={part}
+                        onChange={(patch) => updatePart(index, patch)}
+                        part
+                      />
+                      <div className="planner-part-actions">
+                        <button
+                          type="button"
+                          className="stress-map-button stress-map-button--ghost"
+                          disabled={index === 0}
+                          onClick={() => {
+                            const parts = [...session.components]
+                            ;[parts[index - 1], parts[index]] = [
+                              parts[index],
+                              parts[index - 1],
+                            ]
+                            updateParts(parts)
+                          }}
+                          aria-label={`Move part ${index + 1} earlier`}
+                        >
+                          Move earlier
+                        </button>
+                        <button
+                          type="button"
+                          className="stress-map-button stress-map-button--ghost"
+                          disabled={index === session.components.length - 1}
+                          onClick={() => {
+                            const parts = [...session.components]
+                            ;[parts[index], parts[index + 1]] = [
+                              parts[index + 1],
+                              parts[index],
+                            ]
+                            updateParts(parts)
+                          }}
+                          aria-label={`Move part ${index + 1} later`}
+                        >
+                          Move later
+                        </button>
+                        <button
+                          type="button"
+                          className="stress-map-button stress-map-button--ghost"
+                          disabled={session.components.length === 1}
+                          onClick={() =>
+                            updateParts(
+                              session.components.filter(
+                                (_, position) => position !== index,
+                              ),
+                            )
+                          }
+                          aria-label={`Remove part ${index + 1}`}
+                        >
+                          Remove part
+                        </button>
+                      </div>
+                    </fieldset>
+                  ))}
+                  <button
+                    type="button"
+                    className="stress-map-button stress-map-button--ghost"
+                    onClick={() =>
+                      updateParts([...session.components, newPart()])
+                    }
+                  >
+                    Add another part
+                  </button>
+                  {errors.booking ? (
+                    <p
+                      className="stress-map-field__error"
+                      role="alert"
+                      tabIndex="-1"
+                      aria-invalid="true"
+                    >
+                      {errors.booking}
                     </p>
                   ) : null}
                 </section>
               ) : null}
 
+              <div className="planner-booking-summary" aria-live="polite">
+                <strong>
+                  {Number.isFinite(duration) ? duration : 0} minutes in total
+                </strong>
+                {finish ? (
+                  <span>
+                    Finishes at {finish}
+                    {finishNextDay ? ' the following day' : ''}
+                  </span>
+                ) : null}
+                {finishError && (
+                  <span className="stress-map-field__error">{finishError}</span>
+                )}
+              </div>
+
+              <details className="stress-map-details" ref={optionalRef}>
+                <summary>Optional: progression and session review</summary>
+                <Field
+                  label="Do you repeat an exercise or session so you can compare performance?"
+                  hint="For example, repeating the same squat sets to compare weights and reps, or running the same 5 km route to compare your time."
+                >
+                  <select
+                    value={session.progression || ''}
+                    onChange={(event) =>
+                      update({ progression: event.target.value })
+                    }
+                  >
+                    <option value="">Not recorded</option>
+                    <option value="yes">
+                      Yes, with a plan for how it progresses
+                    </option>
+                    <option value="partly">
+                      I do the same sessions &amp; exercises but am not sure how
+                      they progress
+                    </option>
+                    <option value="no">No, the sessions vary</option>
+                  </select>
+                </Field>
+                <Field
+                  label="Expected session effort score"
+                  hint="Optional. Rate overall effort from 1 (very easy) to 10 (maximal)."
+                  error={errors.plannedRpe}
+                >
+                  <input
+                    type="number"
+                    min="1"
+                    max="10"
+                    inputMode="decimal"
+                    value={session.plannedRpe ?? ''}
+                    onChange={(event) =>
+                      update({ plannedRpe: event.target.value })
+                    }
+                    aria-invalid={Boolean(errors.plannedRpe)}
+                  />
+                </Field>
+                {getSessionType(session.type).running ||
+                session.runDistance ||
+                session.longestRun30 ? (
+                  <div className="stress-map-field-grid">
+                    <Field
+                      label="Planned run distance"
+                      hint="Use the same unit for both distances"
+                      error={errors.runDistance}
+                    >
+                      <input
+                        type="number"
+                        min="0"
+                        step="any"
+                        value={session.runDistance ?? ''}
+                        onChange={(event) =>
+                          update({ runDistance: event.target.value })
+                        }
+                        aria-invalid={Boolean(errors.runDistance)}
+                      />
+                    </Field>
+                    <Field
+                      label="Longest run in the previous 30 days"
+                      error={errors.longestRun30}
+                    >
+                      <input
+                        type="number"
+                        min="0"
+                        step="any"
+                        value={session.longestRun30 ?? ''}
+                        onChange={(event) =>
+                          update({ longestRun30: event.target.value })
+                        }
+                        aria-invalid={Boolean(errors.longestRun30)}
+                      />
+                    </Field>
+                  </div>
+                ) : null}
+                <h3>After the session</h3>
+                <div className="stress-map-field-grid">
+                  <Field
+                    label="Completed duration"
+                    hint="Minutes"
+                    error={errors.actualDuration}
+                  >
+                    <input
+                      type="number"
+                      min="1"
+                      max="1440"
+                      step="1"
+                      inputMode="numeric"
+                      value={session.actualDuration ?? ''}
+                      onChange={(event) =>
+                        update({ actualDuration: event.target.value })
+                      }
+                      aria-invalid={Boolean(errors.actualDuration)}
+                    />
+                  </Field>
+                  <Field
+                    label="Completed session effort score"
+                    hint="1 to 10"
+                    error={errors.actualRpe}
+                  >
+                    <input
+                      type="number"
+                      min="1"
+                      max="10"
+                      value={session.actualRpe ?? ''}
+                      onChange={(event) =>
+                        update({ actualRpe: event.target.value })
+                      }
+                      aria-invalid={Boolean(errors.actualRpe)}
+                    />
+                  </Field>
+                </div>
+                <Field label="Performance compared with your target">
+                  <select
+                    value={session.review?.performance || ''}
+                    onChange={(event) =>
+                      update({
+                        review: {
+                          ...session.review,
+                          performance: event.target.value,
+                        },
+                      })
+                    }
+                  >
+                    <option value="">Not recorded</option>
+                    <option value="better">Better</option>
+                    <option value="expected">As expected</option>
+                    <option value="worse">Worse</option>
+                  </select>
+                </Field>
+              </details>
               <Field label="Notes" hint="Optional">
                 <textarea
-                  rows="4"
+                  rows="3"
                   value={session.notes || ''}
                   onChange={(event) => update({ notes: event.target.value })}
-                  placeholder="Anything important about class content, constraints or progression."
                 />
               </Field>
             </div>
-
             <footer className="stress-map-editor__footer">
-              <button type="button" className="stress-map-button stress-map-button--ghost" onClick={onClose}>Cancel</button>
-              <button type="button" className="stress-map-button stress-map-button--signal" onClick={save}>Save session</button>
+              <button
+                type="button"
+                className="stress-map-button stress-map-button--ghost"
+                onClick={onClose}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="stress-map-button stress-map-button--signal"
+                onClick={save}
+              >
+                Save session
+              </button>
             </footer>
           </motion.section>
         </motion.div>

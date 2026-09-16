@@ -318,7 +318,7 @@ function StressMapRoute() {
   useEffect(() => {
     updateMetadata({
       title: 'The Hybrid Training Week Stress Map',
-      description: 'Map session load, stress fingerprints, goal alignment, progression and recovery context across a hybrid training week.',
+      description: 'Arrange training around your available times, compare explained changes and download your revised calendar.',
       path: STRESS_MAP_PATH,
     })
   }, [])
@@ -326,7 +326,7 @@ function StressMapRoute() {
   return (
     <Suspense fallback={(
       <div className="stress-map-route-loading" role="status">
-        <img src="/brand/logo-lockup-light.png" alt="" />
+        <img src="/brand/logo-lockup.png" alt="" />
         <p>Loading the Stress Map</p>
       </div>
     )}>

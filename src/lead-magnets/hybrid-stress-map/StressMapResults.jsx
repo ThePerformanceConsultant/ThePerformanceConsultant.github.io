@@ -1,553 +1,785 @@
 'use client'
 
-import { motion, useReducedMotion } from 'motion/react'
-import { useEffect, useMemo, useRef, useState } from 'react'
-
+import { useMemo, useState } from 'react'
+import { DOMAIN_DEFINITIONS } from './constants.js'
+import { analyseWeek } from './engine.js'
+import { pairContext } from './planner.js'
 import {
-  BODY_AREAS,
-  DAYS,
-  DOMAIN_DEFINITIONS,
-  EVIDENCE_REFERENCES,
-} from './constants.js'
-import { formatLoad, formatPercent } from './engine.js'
+  bookingDuration,
+  dayLabel,
+  formatGap,
+  pairKey,
+} from './planning-model.js'
+import { downloadPlanCalendar } from './calendar.js'
+import { Arrow, Field, timing, WeekCalendar } from './PlanningUI.jsx'
 
-function ResultEyebrow({ children }) {
-  return <p className="stress-map-result-eyebrow">{children}</p>
+const BASIS = {
+  schedule: 'From your timetable',
+  reported: 'From your experience',
+  inferred: 'Inferred from your session details',
 }
+const ANSWERS = [
+  ['yes', 'Yes'],
+  ['sometimes', 'Sometimes'],
+  ['no', 'No'],
+  ['unknown', 'Not sure'],
+]
+const asText = (value) =>
+  typeof value === 'string'
+    ? value
+    : value?.message || value?.reason || value?.detail || ''
 
-function Fingerprint({ stress, compact = false }) {
-  return (
-    <div className={`stress-map-fingerprint ${compact ? 'stress-map-fingerprint--compact' : ''}`}>
-      {DOMAIN_DEFINITIONS.map((domain) => {
-        const score = Number(stress?.[domain.key]) || 0
-        return (
-          <div key={domain.key} title={`${domain.label}: ${score} of 3`}>
-            <span aria-hidden="true">
-              <i style={{ '--stress-level': score }} />
-            </span>
-            <b>{domain.short}</b>
-            <small>{score}</small>
-          </div>
-        )
-      })}
-    </div>
-  )
-}
-
-function WeeklyHeatmap({ days }) {
-  return (
-    <div className="stress-map-heatmap-shell">
-      <table className="stress-map-heatmap" aria-label="Maximum daily stress by domain">
-        <thead>
-          <tr>
-            <th className="stress-map-heatmap__corner" scope="col">Domain</th>
-            {days.map((day) => <th key={day.value} scope="col">{day.short}</th>)}
-          </tr>
-        </thead>
-        <tbody>
-          {DOMAIN_DEFINITIONS.map((domain) => (
-            <tr className="stress-map-heatmap__row" key={domain.key}>
-              <th scope="row"><span>{domain.label}</span><b>{domain.short}</b></th>
-              {days.map((day) => {
-                const score = day.domains[domain.key]
-                return (
-                  <td
-                    key={day.value}
-                    className={`stress-level-${score}`}
-                    aria-label={`${day.label}, ${domain.label}: ${score} of 3`}
-                  >
-                    {score}
-                  </td>
+function OptionalDetail({ audit }) {
+  const analysis = useMemo(
+    () =>
+      analyseWeek(
+        {
+          ...audit,
+          sessions: audit.sessions.map((session) => {
+            const stress = session.components?.length
+              ? Object.fromEntries(
+                  DOMAIN_DEFINITIONS.map((domain) => [
+                    domain.key,
+                    Math.max(
+                      0,
+                      ...session.components.map((part) =>
+                        Number(part.stress?.[domain.key] || 0),
+                      ),
+                    ),
+                  ]),
                 )
-              })}
+              : session.stress
+            return { ...session, duration: bookingDuration(session), stress }
+          }),
+        },
+        { skipValidation: true, skipRevision: true },
+      ),
+    [audit],
+  )
+  return (
+    <div className="planner-optional-detail">
+      <p>
+        The amounts below come from the session types and descriptions you
+        confirmed. Select a session in the calendar above to change its details.
+      </p>
+      <div className="planner-table-scroll">
+        <table>
+          <caption>Relative demands in the entered sessions</caption>
+          <thead>
+            <tr>
+              <th>Session</th>
+              {DOMAIN_DEFINITIONS.map((domain) => (
+                <th key={domain.key}>{domain.label}</th>
+              ))}
             </tr>
-          ))}
-        </tbody>
-      </table>
-      <div className="stress-map-heatmap__legend" aria-label="Stress scale">
-        <span><i className="stress-level-0" />0 negligible</span>
-        <span><i className="stress-level-1" />1 light</span>
-        <span><i className="stress-level-2" />2 substantial</span>
-        <span><i className="stress-level-3" />3 dominant or high</span>
+          </thead>
+          <tbody>
+            {audit.sessions.map((session) => {
+              const confirmed = session.components?.length
+                ? session.components.every((part) => part.fingerprintConfirmed)
+                : session.fingerprintConfirmed
+              const analysed = analysis.sessions.find(
+                (item) => item.id === session.id,
+              )
+              return (
+                <tr key={session.id}>
+                  <th>
+                    {dayLabel(audit, session.day)} · {session.name}
+                  </th>
+                  {DOMAIN_DEFINITIONS.map((domain) => (
+                    <td
+                      key={domain.key}
+                      data-level={
+                        confirmed
+                          ? analysed?.stress?.[domain.key] || 0
+                          : undefined
+                      }
+                    >
+                      {confirmed
+                        ? analysed?.stress?.[domain.key] || 0
+                        : 'Not set'}
+                    </td>
+                  ))}
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
       </div>
-      <p>Colours describe relative demand. They do not describe danger.</p>
+      <p className="planner-hint">
+        0 None · 1 Small amount · 2 Moderate · 3 Substantial
+      </p>
+      <h3>Progression and completed sessions</h3>
+      <div className="planner-table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Session</th>
+              <th>Progression</th>
+              <th>Planned effort</th>
+              <th>Completed duration / effort</th>
+            </tr>
+          </thead>
+          <tbody>
+            {audit.sessions.map((session) => (
+              <tr key={session.id}>
+                <th>
+                  {dayLabel(audit, session.day)} · {session.name}
+                </th>
+                <td>
+                  {{
+                    yes: 'Planned progression',
+                    partly: 'Repeated; progression unsure',
+                    no: 'Sessions vary',
+                  }[session.progression] || 'Not entered'}
+                </td>
+                <td>{session.plannedRpe || 'Not entered'}</td>
+                <td>
+                  {session.actualDuration
+                    ? `${session.actualDuration} min`
+                    : 'Not entered'}
+                  {session.actualRpe ? ` / ${session.actualRpe}` : ''}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   )
 }
 
-function WeekBoard({ days, actions, title = 'Current weekly map' }) {
+function PairQuestion({ audit, sourceId, targetId, onAnswer, needsUpdate }) {
+  const source = audit.sessions.find((session) => session.id === sourceId)
+  const target = audit.sessions.find((session) => session.id === targetId)
+  if (!source || !target) return null
+  const answer = audit.pairResponses[pairKey(sourceId, targetId)]?.answer
+  if (!Number.isFinite(pairContext(audit, sourceId, targetId)?.gapMinutes))
+    return <p className="planner-hint">Choose the earlier session first.</p>
   return (
-    <section className="stress-map-week-board" aria-labelledby={`week-board-${title.replaceAll(' ', '-').toLowerCase()}`}>
-      <div className="stress-map-result-section__header">
-        <ResultEyebrow>Seven-day structure</ResultEyebrow>
-        <h3 id={`week-board-${title.replaceAll(' ', '-').toLowerCase()}`}>{title}</h3>
-      </div>
-      <div className="stress-map-week-grid">
-        {days.map((day) => (
-          <article key={day.value} className={day.lowStress ? 'is-low-stress' : ''}>
-            <header>
-              <span>{day.short}</span>
-              <b>{day.lowStress ? 'Low stress' : formatLoad(day.plannedLoad)}</b>
-            </header>
-            <div>
-              {day.sessions.length ? day.sessions.map((session) => (
-                <div className="stress-map-week-session" key={session.id}>
-                  <span>{session.startTime}</span>
-                  <h4>{session.label}</h4>
-                  {actions?.[session.id] ? <b data-action={actions[session.id].action}>{actions[session.id].label}</b> : null}
-                  <Fingerprint stress={session.stress} compact />
-                </div>
-              )) : <p>No session</p>}
-            </div>
-          </article>
+    <div className="planner-pair-question">
+      <p>
+        With the times you entered, have you found that the time between “
+        {source.name}” on <strong>{dayLabel(audit, source.day)}</strong> and “
+        {target.name}” on <strong>{dayLabel(audit, target.day)}</strong> affects
+        “{target.name}” or your sleep?
+      </p>
+      {needsUpdate && (
+        <p className="planner-answer-update">
+          You previously answered{' '}
+          {ANSWERS.find(([value]) => value === answer)?.[1] || 'Not sure'}.
+          These session details have changed; update the answer if needed.
+        </p>
+      )}
+      <div
+        className="planner-answer-options"
+        role="group"
+        aria-label={`Experience between ${source.name} on ${dayLabel(audit, source.day)} and ${target.name} on ${dayLabel(audit, target.day)}`}
+      >
+        {ANSWERS.map(([value, label]) => (
+          <button
+            type="button"
+            aria-pressed={answer === value}
+            key={value}
+            onClick={() => onAnswer(sourceId, targetId, value)}
+          >
+            {label}
+          </button>
         ))}
       </div>
-    </section>
+    </div>
   )
 }
 
-function CollisionCard({ collision, sessionMap }) {
-  const sessions = (collision.sessionIds || []).map((id) => sessionMap.get(id)).filter(Boolean)
+function OtherPair({ audit, onAnswer }) {
+  const [sourceId, setSource] = useState('')
+  const [targetId, setTarget] = useState('')
+  const label = (session) =>
+    `${dayLabel(audit, session.day)} ${session.startTime} · ${session.name}`
   return (
-    <article className={`stress-map-collision stress-map-collision--${collision.severity}`}>
-      <div className="stress-map-collision__top">
-        <span>{collision.severity === 'information' ? 'Context' : collision.severity}</span>
-        <small>{collision.recoveryAmplified ? 'Recovery context increases review priority' : collision.ruleId.replaceAll('-', ' ')}</small>
+    <details className="stress-map-details">
+      <summary>Check another pair of sessions</summary>
+      <p>
+        For example, Thursday’s leg session may still affect Sunday’s long run
+        even though another session falls between them. Select both sessions
+        below.
+      </p>
+      <div className="stress-map-field-grid">
+        <Field label="Earlier session">
+          <select
+            value={sourceId}
+            onChange={(e) => {
+              setSource(e.target.value)
+              if (e.target.value === targetId) setTarget('')
+            }}
+          >
+            <option value="">Choose a session</option>
+            {audit.sessions.map((session) => (
+              <option value={session.id} key={session.id}>
+                {label(session)}
+              </option>
+            ))}
+          </select>
+        </Field>
+        <Field label="Later session">
+          <select value={targetId} onChange={(e) => setTarget(e.target.value)}>
+            <option value="">Choose a session</option>
+            {audit.sessions
+              .filter((session) => session.id !== sourceId)
+              .map((session) => (
+                <option value={session.id} key={session.id}>
+                  {label(session)}
+                </option>
+              ))}
+          </select>
+        </Field>
       </div>
-      <h4>{collision.headline}</h4>
-      <p>{collision.explanation}</p>
-      {sessions.length ? (
-        <div className="stress-map-collision__sessions">
-          {sessions.map((session) => <span key={session.id}>{DAYS[session.day].short} · {session.label}</span>)}
-        </div>
-      ) : null}
-      <details>
-        <summary>Review options</summary>
-        <ul>{collision.suggestions.map((suggestion) => <li key={suggestion}>{suggestion}</li>)}</ul>
-      </details>
-    </article>
+      {sourceId && targetId && (
+        <PairQuestion
+          audit={audit}
+          sourceId={sourceId}
+          targetId={targetId}
+          onAnswer={onAnswer}
+        />
+      )}
+    </details>
   )
 }
 
-function CopySummaryButton({ analysis }) {
-  const [state, setState] = useState('idle')
-  const actor = analysis.sessions.find((session) => session.id === analysis.mainFinding?.actorSessionId)
-  const action = actor ? analysis.actions[actor.id] : null
-  const summary = [
-    `Hybrid Training Week Stress Map`,
-    `Priority 1: ${analysis.profile.priority1}`,
-    `Priority 2: ${analysis.profile.priority2}`,
-    `Result: ${analysis.statusCopy.title}`,
-    `Main finding: ${analysis.mainFinding?.headline || 'No major structural collision identified.'}`,
-    `Session to protect: ${analysis.sessionToProtect?.label || 'No specific session identified.'}`,
-    `First change: ${actor && action ? `${action.label}: ${actor.label}` : 'No immediate change identified.'}`,
-    `Leave unchanged: ${analysis.leaveUnchanged?.label || 'Review after completing the week.'}`,
-    `Planned weekly load: ${formatLoad(analysis.totalLoad)} arbitrary units`,
-    `Unstructured load share: ${formatPercent(analysis.progression.unstructuredShare)}`,
-    `Scope: This is a programming audit, not an injury-prediction tool.`,
-  ].join('\n')
-
-  const copy = async () => {
+function CalendarDownload({ audit, plan }) {
+  const [weekStart, setWeekStart] = useState(audit.weekStart || '')
+  const [repeat, setRepeat] = useState(false)
+  const [repeatUntil, setRepeatUntil] = useState('')
+  const timeZone = audit.timeZone
+  const [message, setMessage] = useState('')
+  const [copyMessage, setCopyMessage] = useState('')
+  const download = () => {
+    if (repeat && !repeatUntil) {
+      setMessage('Choose the last date for your weekly sessions.')
+      return
+    }
     try {
-      await navigator.clipboard.writeText(summary)
-      setState('copied')
-      window.setTimeout(() => setState('idle'), 1800)
-    } catch {
-      setState('error')
+      downloadPlanCalendar({
+        audit: { ...audit, timeZone },
+        plan,
+        weekStart,
+        repeatUntil: repeat ? repeatUntil : '',
+      })
+      setMessage('Calendar file downloaded.')
+    } catch (error) {
+      setMessage(
+        error.message ||
+          'The calendar could not be downloaded. Check the dates and try again.',
+      )
     }
   }
-
+  const copy = async () => {
+    const content = [
+      'Training Week Stress Map',
+      ...plan.sessions.map(
+        (session) =>
+          `${timing(audit, session)} · ${session.name}${session.location ? ` · ${session.location}` : ''}`,
+      ),
+      '',
+      ...plan.changes
+        .flatMap((change) => [
+          change.summary,
+          change.reason,
+          change.detail,
+          change.availability,
+          ...(change.consequences || []).map(asText),
+        ])
+        .filter(Boolean),
+    ].join('\n')
+    try {
+      await navigator.clipboard.writeText(content)
+      setCopyMessage('Summary copied.')
+    } catch {
+      setCopyMessage(
+        'The browser could not copy the summary. Select and copy the text on this page instead.',
+      )
+    }
+  }
   return (
-    <button type="button" className="stress-map-button stress-map-button--ghost-light" onClick={copy}>
-      {state === 'copied' ? 'Summary copied' : state === 'error' ? 'Copy unavailable' : 'Copy summary'}
-    </button>
-  )
-}
-
-function RevisedWeek({ analysis }) {
-  const revision = analysis.revisedWeek
-  if (!revision) return null
-  const revisedHeading = revision.status === 'moved'
-    ? 'A revised week, based only on the availability you entered.'
-    : revision.status === 'rotate'
-      ? 'A rotation test that removes one automatic weekly addition.'
-      : 'No automatic revision has been made.'
-  const revisionLabel = {
-    moved: 'Suggested move',
-    rotate: 'Rotation test',
-    modify: 'Dose or modality decision',
-    manual: 'Manual decision',
-    unchanged: 'Original structure retained',
-  }[revision.status] || 'Review decision'
-
-  const revisedDays = DAYS.map((day) => ({
-    ...day,
-    sessions: revision.sessions.filter((session) => session.day === day.value),
-  }))
-
-  return (
-    <section className="stress-map-revision">
-      <div className="stress-map-result-section__header">
-        <ResultEyebrow>Test structure</ResultEyebrow>
-        <h3>{revisedHeading}</h3>
+    <section className="planner-download">
+      <div>
+        <p className="stress-map-kicker">Your selected week</p>
+        <h3>Download your training calendar</h3>
+        <p>
+          The file includes every session in the selected timetable, with the
+          reasons for any moves.
+        </p>
       </div>
-      <div className={`stress-map-revision__notice stress-map-revision__notice--${revision.status}`}>
-        <span>{revisionLabel}</span>
-        <p>{revision.message}</p>
+      <div className="stress-map-field-grid">
+        <Field
+          label={
+            audit.weekMode === 'typical'
+              ? 'First Monday'
+              : 'First date of this week'
+          }
+        >
+          <input
+            type="date"
+            value={weekStart}
+            disabled={audit.weekMode === 'specific'}
+            onChange={(e) => setWeekStart(e.target.value)}
+          />
+        </Field>
+        <Field label="Time zone" hint="Set in Available time">
+          <input value={timeZone} readOnly />
+        </Field>
       </div>
-      <div className="stress-map-revision__grid">
-        {revisedDays.map((day) => (
-          <article key={day.value}>
-            <span>{day.short}</span>
-            <div>
-              {day.sessions.length
-                ? day.sessions.map((session) => <p key={session.id}>{session.label}</p>)
-                : <p>Low-stress or no session</p>}
-            </div>
-          </article>
-        ))}
-      </div>
-      <p className="stress-map-revision__scope">
-        No session has been automatically moved to an unavailable time. Recalculate after changing dose, modality or position.
-      </p>
-    </section>
-  )
-}
-
-function BodyAreaWatchlist({ analysis }) {
-  const selected = new Set(analysis.profile.bodyConcerns || [])
-  const areas = BODY_AREAS.map((area) => ({
-    area,
-    concerned: selected.has(area),
-    sessions: analysis.sessions.filter((session) => session.bodyAreas.includes(area)),
-  })).filter((item) => item.concerned || item.sessions.length >= 2)
-
-  if (!areas.length) return null
-
-  return (
-    <section className="stress-map-watchlist">
-      <div className="stress-map-result-section__header">
-        <ResultEyebrow>Body-area watchlist</ResultEyebrow>
-        <h3>Repeated exposure, displayed without assigning injury probability.</h3>
-      </div>
-      <div className="stress-map-watchlist__grid">
-        {areas.map((item) => (
-          <article key={item.area} className={item.concerned ? 'is-concern' : ''}>
-            <header>
-              <h4>{item.area}</h4>
-              <span>{item.sessions.length} session{item.sessions.length === 1 ? '' : 's'}</span>
-            </header>
-            {item.sessions.length
-              ? <p>{item.sessions.map((session) => `${DAYS[session.day].short} ${session.label}`).join(' · ')}</p>
-              : <p>No session was tagged with substantial exposure.</p>}
-          </article>
-        ))}
-      </div>
-    </section>
-  )
-}
-
-function ReviewPanel({ analysis, onReviewMode }) {
-  const review = analysis.review
-  const reviewLabel = (value) => ({
-    yes: 'Completed as planned',
-    partly: 'Partly completed',
-    no: 'Not completed as planned',
-    better: 'Better than target',
-    expected: 'As expected',
-    worse: 'Worse than target',
-    time: 'Time',
-    fatigue: 'Fatigue',
-    pain: 'Pain',
-    'class-content': 'Class content',
-    motivation: 'Motivation',
-    other: 'Other',
-  }[value] || '')
-  return (
-    <section className="stress-map-review-panel">
-      <div className="stress-map-result-section__header">
-        <ResultEyebrow>Seven-day review</ResultEyebrow>
-        <h3>Compare the week you planned with the week you completed.</h3>
-      </div>
-      {!review.reviewed.length ? (
-        <div className="stress-map-review-panel__empty">
-          <p>Complete the training week, then record actual duration and overall session RPE. The tool will highlight repeated differences between plan and practice.</p>
-          <button type="button" className="stress-map-button stress-map-button--dark" onClick={onReviewMode}>Open review mode</button>
-        </div>
-      ) : (
+      {audit.weekMode === 'typical' && (
         <>
-          <div className="stress-map-review-metrics">
-            <div><span>Review coverage</span><strong>{formatPercent(review.coverage)}</strong></div>
-            <div>
-              <span>Actual weekly load</span>
-              <strong>{formatLoad(review.actualTotal)}</strong>
-              {review.actualTotal == null ? <small>Complete duration and RPE for every session</small> : null}
-            </div>
-            <div><span>Sessions above plan</span><strong>{review.warnings.length}</strong></div>
-          </div>
-          {review.weeklyAbovePlan ? (
-            <div className="stress-map-review-warning">
-              <span>Actual load above plan</span>
-              <p>Your week is more demanding in practice than it appears on paper. Review unknown class content, extended sessions, spontaneous accessories and “easy” work becoming moderate.</p>
-            </div>
-          ) : null}
-          <div className="stress-map-review-sessions">
-            {review.reviewed.map((session) => (
-              <article key={session.id}>
-                <div>
-                  <span>{DAYS[session.day].short} · {session.label}</span>
-                  <strong>{session.actualDuration} min × RPE {session.actualRpe} = {formatLoad(session.actualLoad)}</strong>
-                </div>
-                <p>
-                  {[
-                    reviewLabel(session.review?.completion),
-                    reviewLabel(session.review?.performance),
-                    session.review?.soreness !== '' && session.review?.soreness != null
-                      ? `Soreness ${session.review.soreness}/10`
-                      : '',
-                    session.review?.fatigue !== '' && session.review?.fatigue != null
-                      ? `Fatigue ${session.review.fatigue}/10`
-                      : '',
-                    session.review?.deviationReason
-                      ? `Deviation: ${reviewLabel(session.review.deviationReason)}`
-                      : '',
-                  ].filter(Boolean).join(' · ') || 'No additional response context entered.'}
-                </p>
-              </article>
-            ))}
-          </div>
-          {review.pain.length ? (
-            <div className="stress-map-clinical-note">
-              Pain changed movement in {review.pain.length} session{review.pain.length === 1 ? '' : 's'}. This should be assessed appropriately rather than converted into a stress score.
-            </div>
-          ) : null}
-          <button type="button" className="stress-map-button stress-map-button--dark" onClick={onReviewMode}>Edit review entries</button>
+          <label className="planner-checkbox">
+            <input
+              type="checkbox"
+              checked={repeat}
+              onChange={(e) => setRepeat(e.target.checked)}
+            />
+            Repeat weekly
+          </label>
+          {repeat && (
+            <Field
+              label="Repeat until"
+              hint="Sessions starting on this date are included."
+            >
+              <input
+                type="date"
+                value={repeatUntil}
+                min={weekStart}
+                onChange={(e) => setRepeatUntil(e.target.value)}
+              />
+            </Field>
+          )}
         </>
       )}
+      <div className="planner-add-row">
+        <button
+          type="button"
+          className="stress-map-button stress-map-button--dark"
+          onClick={download}
+        >
+          Download calendar (.ics)
+          <Arrow />
+        </button>
+        <button
+          className="stress-map-button stress-map-button--ghost"
+          onClick={copy}
+        >
+          Copy summary
+        </button>
+      </div>
+      <p className="planner-hint">
+        For Google Calendar, import the file on a computer.{' '}
+        <a
+          href="https://support.google.com/calendar/answer/37118?hl=en-uk"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Import instructions
+        </a>
+      </p>
+      {message && <p role="status">{message}</p>}
+      {copyMessage && <p role="status">{copyMessage}</p>}
     </section>
   )
 }
 
-export function StressMapResults({ analysis, onEdit, onReviewMode, onReset }) {
-  const reduceMotion = useReducedMotion()
-  const resultHeadingRef = useRef(null)
-  const sessionMap = useMemo(() => new Map(analysis.sessions.map((session) => [session.id, session])), [analysis.sessions])
-  const firstActor = analysis.sessions.find((session) => session.id === analysis.mainFinding?.actorSessionId)
-  const firstAction = firstActor ? analysis.actions[firstActor.id] : null
-
-  useEffect(() => {
-    resultHeadingRef.current?.focus({ preventScroll: true })
-  }, [])
-
+export function StressMapResults({
+  audit,
+  plan,
+  onAnswer,
+  onEdit,
+  onEditAvailability,
+  onEditSessions,
+  onAccept,
+  onUndo,
+}) {
+  const [compare, setCompare] = useState(false)
+  const [advanced, setAdvanced] = useState(false)
+  const accepted = audit.acceptedPlan
+  const displayPlan = accepted || plan
+  const changes = displayPlan.changes || []
+  const concerns = plan.concerns || []
+  const blockers = plan.blockers || []
+  const canAccept = ['proposed', 'unchanged'].includes(plan.status)
+  const sentence =
+    typeof displayPlan.summary === 'string' ? displayPlan.summary : ''
   return (
-    <motion.div
-      className="stress-map-results"
-      initial={reduceMotion ? false : { opacity: 0, y: 24 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: reduceMotion ? 0 : 0.55, ease: [0.16, 1, 0.3, 1] }}
-    >
-      <section className={`stress-map-result-hero stress-map-result-hero--${analysis.status}`}>
-        <div className="stress-map-result-hero__signal" aria-hidden="true">
-          <i />
-          <i />
-          <i />
-        </div>
-        <div className="stress-map-result-hero__copy">
-          <ResultEyebrow>{analysis.statusCopy.eyebrow}</ResultEyebrow>
-          <h2 ref={resultHeadingRef} tabIndex="-1">{analysis.statusCopy.title}</h2>
-          <p>{analysis.statusCopy.summary}</p>
-        </div>
-        <div className="stress-map-result-hero__actions">
-          <CopySummaryButton analysis={analysis} />
-          <button type="button" className="stress-map-button stress-map-button--signal" onClick={() => window.print()}>
-            Print or save PDF
-          </button>
-        </div>
-        <div className="stress-map-result-hero__scope">
-          <span>Programming audit</span>
-          <p>This result does not calculate readiness, tolerance or injury risk.</p>
-        </div>
-      </section>
-
-      <section className="stress-map-result-decisions">
-        <article>
-          <span>01 · Main finding</span>
-          <h3>{analysis.mainFinding?.headline || 'No clear structural collision was identified.'}</h3>
-          <p>{analysis.mainFinding?.explanation || 'Complete the week and compare planned with actual session RPE before changing the structure.'}</p>
-        </article>
-        <article>
-          <span>02 · Protect</span>
-          <h3>{analysis.sessionToProtect?.label || 'No specific session identified'}</h3>
-          <p>{analysis.sessionToProtect
-            ? 'This progressive Priority 1 session should receive the highest realistic freshness.'
-            : 'Define at least one progressive Priority 1 session before making further changes.'}</p>
-        </article>
-        <article>
-          <span>03 · First change</span>
-          <h3>{firstActor && firstAction ? `${firstAction.label}: ${firstActor.label}` : 'Leave the order unchanged for now'}</h3>
-          <p>{firstAction?.description || 'The audit does not support inventing a change without clearer evidence.'}</p>
-        </article>
-        <article>
-          <span>04 · Leave unchanged</span>
-          <h3>{analysis.leaveUnchanged?.label || 'Complete the seven-day review'}</h3>
-          <p>{analysis.leaveUnchanged
-            ? 'This session has a clear role and is not the first source of conflict.'
-            : 'Do not move sessions simply to obtain a different colour.'}</p>
-        </article>
-      </section>
-
-      <section className="stress-map-metrics" aria-label="Weekly analysis">
-        <article>
-          <span>Planned weekly load</span>
-          <strong>{formatLoad(analysis.metrics.totalLoad)}</strong>
-          <p>Arbitrary units, interpreted within this week.</p>
-        </article>
-        <article>
-          <span>Unstructured load share</span>
-          <strong>{formatPercent(analysis.metrics.unstructuredShare)}</strong>
-          <p>{analysis.progression.shareLabel}.</p>
-        </article>
-        <article>
-          <span>Collision flags</span>
-          <strong>{analysis.metrics.redCollisions}<small> red</small></strong>
-          <p>{analysis.metrics.amberCollisions} amber review flag{analysis.metrics.amberCollisions === 1 ? '' : 's'}.</p>
-        </article>
-        <article>
-          <span>Recovery context</span>
-          <strong>{analysis.recovery.label}</strong>
-          <p>{analysis.recovery.count} contextual factor{analysis.recovery.count === 1 ? '' : 's'} selected.</p>
-        </article>
-      </section>
-
-      <section className="stress-map-result-section stress-map-result-section--heatmap">
-        <div className="stress-map-result-section__header">
-          <ResultEyebrow>Stress fingerprint</ResultEyebrow>
-          <h3>Different sessions can repeat the same demand.</h3>
-          <p>Each cell shows the highest score reached on that day. Session-RPE load remains separate.</p>
-        </div>
-        <WeeklyHeatmap days={analysis.days} />
-      </section>
-
-      <WeekBoard days={analysis.days} actions={analysis.actions} />
-
-      <section className="stress-map-action-table">
-        <div className="stress-map-result-section__header">
-          <ResultEyebrow>Session actions</ResultEyebrow>
-          <h3>Protect, keep, move, modify or rotate.</h3>
-        </div>
+    <div className="planner-results">
+      <header className="stress-map-step__header">
+        <span>03 / 03</span>
         <div>
-          {analysis.sessions.map((session) => {
-            const action = analysis.actions[session.id]
-            return (
-              <article key={session.id}>
-                <div>
-                  <span>{DAYS[session.day].short} · {session.startTime}</span>
-                  <h4>{session.label}</h4>
-                </div>
-                <Fingerprint stress={session.stress} compact />
-                <div>
-                  <b data-action={action.action}>{action.label}</b>
-                  <p>{action.description}</p>
-                  {action.secondary ? <small>{action.secondary}</small> : null}
-                </div>
-              </article>
-            )
-          })}
+          <p>{accepted ? 'Your selected week' : 'Your proposed week'}</p>
+          <h2>
+            {accepted ? (
+              <>
+                Your training <em>timetable.</em>
+              </>
+            ) : changes.length ? (
+              <>
+                {changes.length === 1
+                  ? 'One session'
+                  : `${changes.length} sessions`}{' '}
+                <em>can move.</em>
+              </>
+            ) : (
+              <>
+                Review your <em>training week.</em>
+              </>
+            )}
+          </h2>
+          {sentence && <p>{sentence}</p>}
         </div>
-      </section>
-
-      <section className="stress-map-collisions-section">
-        <div className="stress-map-result-section__header">
-          <ResultEyebrow>Collision review</ResultEyebrow>
-          <h3>{analysis.collisions.length
-            ? `${analysis.collisions.length} finding${analysis.collisions.length === 1 ? '' : 's'} to interpret in context.`
-            : 'No collision rule was activated.'}</h3>
-          <p>One session can activate more than one rule. Review the main cause before making several changes.</p>
-        </div>
-        {analysis.collisions.length ? (
-          <div className="stress-map-collisions-grid">
-            {analysis.collisions.map((collision) => (
-              <CollisionCard key={collision.id} collision={collision} sessionMap={sessionMap} />
-            ))}
+      </header>
+      <section className="planner-summary" aria-label="Summary of changes">
+        <div className="planner-summary-numbers">
+          <div>
+            <strong>
+              {displayPlan.sessions?.length || audit.sessions.length}
+            </strong>
+            <span>Sessions kept</span>
           </div>
-        ) : (
-          <div className="stress-map-empty-result">
-            <p>Complete the planned week and compare actual RPE before increasing volume or adding another hard exposure.</p>
+          <div>
+            <strong>{changes.length}</strong>
+            <span>{changes.length === 1 ? 'Change' : 'Changes'}</span>
+          </div>
+          <div>
+            <strong>{audit.sessions.filter((s) => s.priority).length}</strong>
+            <span>Priority sessions</span>
+          </div>
+        </div>
+        {changes.length > 0 && (
+          <ul>
+            {changes.map((change) => (
+              <li key={change.sessionId}>
+                <strong>
+                  {audit.sessions.find((s) => s.id === change.sessionId)?.name}
+                </strong>
+                <span>
+                  {timing(audit, change.from)} <Arrow />{' '}
+                  {timing(audit, change.to)}
+                </span>
+                <p>{change.summary || change.detail || change.reason}</p>
+              </li>
+            ))}
+          </ul>
+        )}
+        {(plan.remaining || []).length > 0 && (
+          <div className="planner-remaining">
+            <h3>Still worth reviewing</h3>
+            {plan.remaining.map((item, i) => (
+              <p key={i}>{asText(item)}</p>
+            ))}
           </div>
         )}
       </section>
-
-      <BodyAreaWatchlist analysis={analysis} />
-      <RevisedWeek analysis={analysis} />
-
-      <section className="stress-map-seven-day-test">
+      {blockers.length > 0 && (
+        <section className="planner-blockers">
+          <h3>What limits the available changes</h3>
+          {blockers.map((blocker, i) => (
+            <article key={i}>
+              <p>{asText(blocker)}</p>
+              {audit.sessions
+                .filter((session) =>
+                  [blocker.sessionId, ...(blocker.sessionIds || [])].includes(
+                    session.id,
+                  ),
+                )
+                .map((session) => (
+                  <button
+                    key={session.id}
+                    className="stress-map-text-button"
+                    onClick={() => onEdit(session)}
+                  >
+                    Edit {session.name} on {dayLabel(audit, session.day)}
+                    <Arrow />
+                  </button>
+                ))}
+            </article>
+          ))}
+          <button
+            className="stress-map-button stress-map-button--ghost"
+            onClick={onEditAvailability}
+          >
+            Edit available time
+            <Arrow />
+          </button>
+        </section>
+      )}
+      {plan.status === 'invalid' && (
+        <div className="planner-alert" role="alert">
+          {(plan.errors || ['Some session details need to be completed.']).map(
+            (error, i) => (
+              <div key={i}>
+                <p>{asText(error)}</p>
+                {error.sessionId &&
+                  audit.sessions.some(
+                    (session) => session.id === error.sessionId,
+                  ) && (
+                    <button
+                      className="stress-map-text-button"
+                      onClick={() =>
+                        onEdit(
+                          audit.sessions.find(
+                            (session) => session.id === error.sessionId,
+                          ),
+                        )
+                      }
+                    >
+                      Edit this session
+                      <Arrow />
+                    </button>
+                  )}
+              </div>
+            ),
+          )}
+          <button
+            className="stress-map-button stress-map-button--ghost"
+            onClick={onEditAvailability}
+          >
+            Review available time
+          </button>
+          <button
+            className="stress-map-button stress-map-button--ghost"
+            onClick={onEditSessions}
+          >
+            Review sessions and week dates
+          </button>
+        </div>
+      )}
+      <div className="planner-results-actions">
         <div>
-          <ResultEyebrow>Seven-day test</ResultEyebrow>
-          <h3>Change one decision, then review the response.</h3>
+          {canAccept && !accepted && (
+            <button
+              className="stress-map-button stress-map-button--signal"
+              onClick={() => onAccept(plan)}
+            >
+              Use this week
+              <Arrow />
+            </button>
+          )}
+          {accepted && (
+            <button
+              className="stress-map-button stress-map-button--ghost"
+              onClick={onUndo}
+            >
+              Undo selection
+            </button>
+          )}
+          <button
+            className="stress-map-button stress-map-button--ghost"
+            aria-pressed={compare}
+            onClick={() => setCompare(!compare)}
+          >
+            {compare ? 'Show proposed week' : 'Compare with original'}
+          </button>
         </div>
-        <ol>
-          <li><span>01</span><p>Keep the Priority 1 session and its progression visible.</p></li>
-          <li><span>02</span><p>Change the lowest-priority collision first. Preserve total volume during a sequencing test where practical.</p></li>
-          <li><span>03</span><p>Record actual duration and overall session RPE after each session.</p></li>
-          <li><span>04</span><p>Compare performance, soreness, fatigue and any pain that changed movement.</p></li>
-          <li><span>05</span><p>Change the map when the same collision or plan-to-actual difference persists.</p></li>
-        </ol>
-      </section>
-
-      <ReviewPanel analysis={analysis} onReviewMode={onReviewMode} />
-
-      <section className="stress-map-coaching-route">
-        <div>
-          <ResultEyebrow>Where individual coaching may help</ResultEyebrow>
-          <h3>{analysis.coaching.name} · {analysis.coaching.label}</h3>
-          <p>{analysis.coaching.reason}</p>
-        </div>
-        <div>
-          <strong>{analysis.coaching.price}</strong>
-          {analysis.coaching.name !== 'Review' ? <a className="stress-map-button stress-map-button--signal" href="/?apply=1">Apply for coaching</a> : null}
-        </div>
-      </section>
-
-      <section className="stress-map-methodology">
-        <div className="stress-map-result-section__header">
-          <ResultEyebrow>Methodological boundary</ResultEyebrow>
-          <h3>What this tool can and cannot establish.</h3>
-        </div>
-        <div className="stress-map-methodology__grid">
-          <article>
-            <span>Concurrent training</span>
-            <p>Strength and endurance training are not inherently incompatible. The map protects explosive, power and technical sessions where overlapping work may affect their quality. It does not automatically remove endurance work.</p>
-          </article>
-          <article>
-            <span>Session-RPE</span>
-            <p>Duration multiplied by overall session RPE compares relative internal load within the same athlete. It does not quantify external mechanical work or make different stress types interchangeable.</p>
-          </article>
-          <article>
-            <span>Running novelty</span>
-            <p>A run more than 10% longer than the previous 30-day maximum activates a review warning. The cohort finding is observational and does not establish a safe threshold or individual injury probability.</p>
-          </article>
-          <article>
-            <span>Recovery context</span>
-            <p>Sleep, stress, energy availability, illness, pain and recent training history change how findings should be prioritised. They do not produce a readiness score.</p>
-          </article>
-        </div>
-        <details className="stress-map-reference-list">
-          <summary>Evidence and references</summary>
-          <ol>
-            {EVIDENCE_REFERENCES.map((reference) => (
-              <li key={reference.number}>
-                <span>{reference.number}</span>
-                <p>{reference.citation} <a href={reference.href} target="_blank" rel="noreferrer">{reference.title}</a></p>
-              </li>
-            ))}
-          </ol>
-        </details>
-      </section>
-
-      <footer className="stress-map-results__footer">
-        <button type="button" className="stress-map-button stress-map-button--dark" onClick={onEdit}>Edit the week</button>
-        <button type="button" className="stress-map-button stress-map-button--ghost" onClick={onReset}>Start a new map</button>
-      </footer>
-    </motion.div>
+        <p>
+          {compare
+            ? 'Original timetable'
+            : accepted
+              ? 'Selected timetable'
+              : 'Proposed timetable'}
+        </p>
+      </div>
+      <WeekCalendar
+        audit={audit}
+        sessions={
+          compare ? audit.sessions : displayPlan.sessions || audit.sessions
+        }
+        changes={compare ? [] : changes}
+        onEdit={(session) =>
+          onEdit(session, compare ? null : displayPlan.sessions)
+        }
+        label={compare ? 'Original timetable' : 'Proposed timetable'}
+      />
+      {changes.length > 0 && (
+        <section className="planner-change-list">
+          <h3>Why these changes?</h3>
+          {changes.map((change, i) => (
+            <article className="planner-change" key={change.sessionId}>
+              <header>
+                <span className="planner-change-number">
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+                <div>
+                  <p className="stress-map-kicker">
+                    {BASIS[change.basis] || 'Schedule change'}
+                  </p>
+                  <h4>
+                    {
+                      audit.sessions.find((s) => s.id === change.sessionId)
+                        ?.name
+                    }
+                  </h4>
+                </div>
+              </header>
+              <div className="planner-change-times">
+                <span>
+                  <small>Original</small>
+                  {timing(audit, change.from)}
+                </span>
+                <Arrow />
+                <span>
+                  <small>Proposed</small>
+                  {timing(audit, change.to)}
+                </span>
+              </div>
+              <p className="planner-change-reason">{change.reason}</p>
+              {change.detail && change.detail !== change.reason && (
+                <p>{change.detail}</p>
+              )}
+              {change.availability && (
+                <p className="planner-availability-reason">
+                  {change.availability}
+                </p>
+              )}
+              {Number.isFinite(change.beforeGap) &&
+                Number.isFinite(change.afterGap) && (
+                  <p className="planner-gap">
+                    <span>
+                      {change.beforeGap < 0 || change.afterGap < 0
+                        ? 'Session separation'
+                        : 'Time between sessions'}
+                    </span>
+                    <strong>
+                      {change.beforeGap < 0
+                        ? `${formatGap(change.beforeGap)} overlap`
+                        : formatGap(change.beforeGap)}{' '}
+                      <Arrow />{' '}
+                      {change.afterGap < 0
+                        ? `${formatGap(change.afterGap)} overlap`
+                        : formatGap(change.afterGap)}
+                    </strong>
+                  </p>
+                )}
+              {change.consequences?.length > 0 && (
+                <div className="planner-consequences">
+                  <h5>Elsewhere in the week</h5>
+                  {change.consequences.map((item, j) => (
+                    <p key={j}>{asText(item)}</p>
+                  ))}
+                </div>
+              )}
+              {!!change.mechanismSources?.length && (
+                <details className="stress-map-details">
+                  <summary>Research for this explanation</summary>
+                  {change.mechanismSources.map((source) => (
+                    <p key={source.url}>
+                      <a href={source.url} target="_blank" rel="noreferrer">
+                        {source.label}
+                      </a>
+                    </p>
+                  ))}
+                </details>
+              )}
+              {change.sourceId && change.targetId && (
+                <details className="stress-map-details">
+                  <summary>Add your experience of these sessions</summary>
+                  <PairQuestion
+                    audit={audit}
+                    sourceId={change.sourceId}
+                    targetId={change.targetId}
+                    onAnswer={onAnswer}
+                    needsUpdate={
+                      concerns.find(
+                        (c) =>
+                          c.key === pairKey(change.sourceId, change.targetId),
+                      )?.needsUpdate
+                    }
+                  />
+                </details>
+              )}
+            </article>
+          ))}
+        </section>
+      )}
+      {concerns.length > 0 && (
+        <section className="planner-concerns">
+          <h3>Refine the suggestions with your experience</h3>
+          {concerns.map((concern) => {
+            const source = audit.sessions.find(
+                (s) => s.id === concern.sourceId,
+              ),
+              target = audit.sessions.find((s) => s.id === concern.targetId)
+            return (
+              <details className="stress-map-details" key={concern.key}>
+                <summary>
+                  {source?.name} ({dayLabel(audit, source?.day || 0)}) and{' '}
+                  {target?.name} ({dayLabel(audit, target?.day || 0)})
+                </summary>
+                <p>{concern.reason}</p>
+                {concern.basis === 'inferred' && (
+                  <button
+                    type="button"
+                    className="stress-map-button stress-map-button--ghost"
+                    onClick={() =>
+                      onAnswer(concern.sourceId, concern.targetId, 'no')
+                    }
+                  >
+                    This combination is fine for me
+                  </button>
+                )}
+                <PairQuestion
+                  audit={audit}
+                  sourceId={concern.sourceId}
+                  targetId={concern.targetId}
+                  onAnswer={onAnswer}
+                  needsUpdate={concern.needsUpdate}
+                />
+              </details>
+            )
+          })}
+        </section>
+      )}
+      {audit.sessions.length > 1 && (
+        <OtherPair audit={audit} onAnswer={onAnswer} />
+      )}
+      {accepted && (
+        <CalendarDownload
+          key={accepted.id || audit.id}
+          audit={audit}
+          plan={accepted}
+        />
+      )}
+      <details
+        className="stress-map-details planner-advanced"
+        onToggle={(e) => setAdvanced(e.currentTarget.open)}
+      >
+        <summary>Optional: session demands, progression and review</summary>
+        {advanced && <OptionalDetail audit={audit} />}
+      </details>
+      <details className="stress-map-details">
+        <summary>Research behind the session-spacing suggestions</summary>
+        <p>
+          Strength training can affect a subsequent run. The response depends on
+          the exercises, training experience and the session that follows. The
+          map uses your confirmed session details and any experience you add to
+          explain its suggestions.
+        </p>
+        <p>
+          <a
+            href="https://pubmed.ncbi.nlm.nih.gov/23724883/"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Doma and Deakin: strength and endurance training order, running
+            economy and performance
+          </a>
+        </p>
+        <p>
+          <a
+            href="https://pubmed.ncbi.nlm.nih.gov/28553994/"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Doma and colleagues: repeated resistance exercise and subsequent
+            running performance
+          </a>
+        </p>
+      </details>
+    </div>
   )
 }

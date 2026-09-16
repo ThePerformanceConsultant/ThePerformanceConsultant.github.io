@@ -1,850 +1,1023 @@
 'use client'
 
-import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-
+import { useEffect, useRef, useState } from 'react'
 import '../../styles/stress-map.css'
+import { GOAL_OPTIONS } from './constants.js'
 import {
-  BODY_AREAS,
-  DAYS,
-  EMPTY_AUDIT,
-  EMPTY_PROFILE,
-  GOAL_OPTIONS,
-  HYROX_EXAMPLE,
-  RECOVERY_FLAGS,
-  SCHEMA_VERSION,
-  STORAGE_KEY,
-  getRole,
-  getSessionType,
-  newSession,
-} from './constants.js'
-import { analyseWeek, formatLoad, validateAudit } from './engine.js'
+  bookingDuration,
+  dayOptions,
+  dayLabel,
+  PLANNING_STORAGE_KEY,
+  newPart,
+  newPlanningAudit,
+  newPlanningSession,
+  parseClock,
+  uid,
+} from './planning-model.js'
+import { loadSavedAudits, savePlanningAudit } from './storage.js'
+import { pairContext } from './planner.js'
+import { workedExample } from './examples.js'
+import { Arrow, Field, WeekCalendar } from './PlanningUI.jsx'
 import { SessionEditor } from './SessionEditor.jsx'
 import { StressMapResults } from './StressMapResults.jsx'
 
-const STEPS = [
-  { index: '01', label: 'Priorities' },
-  { index: '02', label: 'Context' },
-  { index: '03', label: 'Week map' },
-  { index: '04', label: 'Results' },
-]
+const STEPS = ['Training sessions', 'Available time', 'Proposed week']
 
-const cloneEmptyAudit = () => ({
-  ...EMPTY_AUDIT,
-  profile: {
-    ...EMPTY_PROFILE,
-    performanceMarkers: ['', ''],
-    maintenanceGoals: [],
-    recoveryFlags: [],
-    bodyConcerns: [],
-  },
-  sessions: [],
-})
-
-function uniqueId() {
-  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') return crypto.randomUUID()
-  return `session-${Date.now()}-${Math.random().toString(16).slice(2)}`
-}
-
-function Field({ label, hint, error, children, className = '' }) {
-  return (
-    <label className={`stress-map-field ${className}`}>
-      <span className="stress-map-field__label">{label}</span>
-      {hint ? <span className="stress-map-field__hint">{hint}</span> : null}
-      {children}
-      {error ? <span className="stress-map-field__error">{error}</span> : null}
-    </label>
-  )
-}
-
-function Toggle({ checked, label, onChange }) {
-  return (
-    <label className={`stress-map-toggle ${checked ? 'is-selected' : ''}`}>
-      <input type="checkbox" checked={checked} onChange={onChange} />
-      <span aria-hidden="true" />
-      <b>{label}</b>
-    </label>
-  )
-}
-
-function StepNav({ current, onSelect }) {
-  return (
-    <nav className="stress-map-step-nav" aria-label="Stress Map progress">
-      {STEPS.map((step, index) => (
-        <button
-          type="button"
-          key={step.label}
-          aria-label={`Step ${step.index}: ${step.label}`}
-          className={`${current === index ? 'is-current' : ''} ${current > index ? 'is-complete' : ''}`}
-          aria-current={current === index ? 'step' : undefined}
-          onClick={() => index <= current && onSelect(index)}
-          disabled={index > current}
-        >
-          <span>{step.index}</span>
-          <b>{step.label}</b>
-        </button>
-      ))}
-    </nav>
-  )
-}
-
-function StressMapHeader({ started, currentStep, onSelectStep, onStart }) {
-  return (
-    <header className="stress-map-header">
-      <a href="/" className="stress-map-header__brand" aria-label="Return to The Performance Consultant">
-        <img src="/brand/logo-lockup-light.png" alt="The Performance Consultant" />
-      </a>
-      {started ? <StepNav current={currentStep} onSelect={onSelectStep} /> : (
-        <p>Free evidence-led programme audit</p>
-      )}
-      <button type="button" className="stress-map-header__action" onClick={onStart}>
-        {started ? 'Continue map' : 'Start audit'} <span aria-hidden="true">↘</span>
-      </button>
-    </header>
-  )
-}
-
-function HeroWeekVisual() {
-  const days = [
-    ['MON', 'Strength', '3', '1', '0', '1'],
-    ['TUE', 'Intervals', '3', '3', '0', '3'],
-    ['WED', 'HYROX', '3', '2', '2', '3'],
-    ['THU', 'Easy run', '1', '2', '0', '0'],
-    ['FRI', 'Strength', '3', '0', '2', '1'],
-    ['SAT', 'Long run', '2', '3', '0', '0'],
-    ['SUN', 'Review', '0', '0', '0', '0'],
-  ]
-  return (
-    <div className="stress-map-hero-visual" aria-hidden="true">
-      <div className="stress-map-hero-visual__head">
-        <span>WEEK / 07</span>
-        <b>STRESS FINGERPRINT</b>
-      </div>
-      <div className="stress-map-hero-visual__labels">
-        <span>DAY</span><span>SESSION</span><span>FORCE</span><span>IMPACT</span><span>GRIP</span><span>HIGH INT.</span>
-      </div>
-      {days.map((day, dayIndex) => (
-        <motion.div
-          key={day[0]}
-          className="stress-map-hero-visual__row"
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.3 + dayIndex * 0.055, duration: 0.45 }}
-        >
-          <b>{day[0]}</b>
-          <span>{day[1]}</span>
-          {day.slice(2).map((score, index) => <i key={index} className={`stress-level-${score}`}>{score}</i>)}
-        </motion.div>
-      ))}
-      <div className="stress-map-hero-visual__scan" />
-      <div className="stress-map-hero-visual__finding">
-        <span>PRIMARY FINDING</span>
-        <p>Impact and metabolic stress repeat within 24 hours.</p>
-      </div>
-    </div>
-  )
-}
-
-function Landing({ hasSavedMap, onStart, onExample }) {
+function Landing({ hasSaved, onStart, onExample }) {
   return (
     <>
       <section className="stress-map-hero">
         <div className="stress-map-hero__grid" aria-hidden="true" />
         <div className="stress-map-hero__copy">
-          <p className="stress-map-kicker">The Performance Consultant · Free interactive tool</p>
+          <p className="stress-map-kicker">
+            The Performance Consultant · Training tools
+          </p>
           <h1>
-            Does your training week
-            <em>actually fit together?</em>
+            Training Week <em>Stress Map</em>
           </h1>
           <p className="stress-map-hero__intro">
-            A weekly stress audit for CrossFit, HYROX, strength and multi-disciplinary athletes.
+            A planning aid to help you balance training with life and its chaos.
           </p>
           <p className="stress-map-hero__body">
-            See what each session is trying to improve, what it costs, and where the week repeatedly loads the same tissues and performance qualities.
+            Add your sessions and available times. Compare a revised timetable,
+            see the reason for each change and download the week to your
+            calendar.
           </p>
           <div className="stress-map-hero__actions">
-            <button type="button" className="stress-map-button stress-map-button--signal stress-map-button--large" onClick={onStart}>
-              {hasSavedMap ? 'Resume my training map' : 'Map my training week'} <span aria-hidden="true">↘</span>
+            <button
+              className="stress-map-button stress-map-button--signal"
+              onClick={onStart}
+            >
+              {hasSaved ? 'Open my training week' : 'Map my training week'}
+              <Arrow />
             </button>
-            <button type="button" className="stress-map-text-button" onClick={onExample}>Explore a worked HYROX example</button>
-          </div>
-          <div className="stress-map-hero__requirements">
-            <span>No wearable required</span>
-            <span>Approximately 10 minutes</span>
-            <span>Saved only on this device</span>
+            <button className="stress-map-text-button" onClick={onExample}>
+              Explore the ATHX example
+              <Arrow />
+            </button>
           </div>
         </div>
-        <HeroWeekVisual />
-        <div className="stress-map-hero__scope">
-          <span>Important scope</span>
-          <p>This is a programming audit rather than an injury-prediction tool. It cannot diagnose an injury or determine individual recovery from one week of data.</p>
+        <div className="stress-map-hero-visual">
+          <div className="stress-map-hero-visual__head">
+            <span>WORKED EXAMPLE</span>
+            <b>ONE CHANGE, EXPLAINED</b>
+          </div>
+          <div className="planner-example-row">
+            <span>
+              TUE
+              <br />
+              <b>18:00</b>
+            </span>
+            <div>
+              <strong>Deadlifts and split squats</strong>
+              <p>Finishes at 19:00</p>
+            </div>
+            <span className="planner-tag">Fixed</span>
+          </div>
+          <div className="planner-example-row planner-example-row--before">
+            <span>
+              WED
+              <br />
+              <b>07:00</b>
+            </span>
+            <div>
+              <strong>Run intervals</strong>
+              <p>12 hours after lifting</p>
+            </div>
+            <span className="planner-tag">Priority</span>
+          </div>
+          <div className="planner-example-move">
+            <Arrow />
+            <span>Move the run to the available Thursday slot</span>
+          </div>
+          <div className="planner-example-row planner-example-row--after">
+            <span>
+              THU
+              <br />
+              <b>07:00</b>
+            </span>
+            <div>
+              <strong>Run intervals</strong>
+              <p>36 hours after lifting</p>
+            </div>
+            <span className="planner-tag planner-tag--moved">Moved</span>
+          </div>
+          <div className="stress-map-hero-visual__finding">
+            <span>WHY THIS CHANGE?</span>
+            <p>
+              Both sessions load your legs. Moving the run gives you another day
+              between them.
+            </p>
+          </div>
         </div>
       </section>
-
       <section className="stress-map-opening">
-        <div className="stress-map-opening__title">
-          <p className="stress-map-kicker stress-map-kicker--dark">The audit asks better questions</p>
-          <h2>Session count is <em>not enough.</em></h2>
+        <div>
+          <p className="stress-map-kicker">Your whole week</p>
+          <h2>
+            Fit training around <em>your commitments.</em>
+          </h2>
         </div>
         <div className="stress-map-opening__copy">
-          <p>The number of sessions in a week does not tell you whether the programme is coherent.</p>
-          <ul>
-            <li>What is each session intended to improve?</li>
-            <li>Which qualities are supposed to progress now?</li>
-            <li>Which sessions repeatedly load the same tissues?</li>
-            <li>Are important sessions performed with enough freshness?</li>
-            <li>How much weekly work has no defined progression?</li>
-            <li>Does the programme fit around sleep, work and recovery?</li>
-          </ul>
+          <p>
+            A fixed class, an early run and a late strength session can be
+            difficult to arrange around work and family. The map compares the
+            times you have available and shows which sessions could move.
+          </p>
+          <p>
+            Mark every priority session. Keep fixed bookings in place. For ATHX
+            and other sessions with separate parts, include the breaks as well
+            as the training.
+          </p>
         </div>
       </section>
-
-      <section className="stress-map-method-strip">
-        <article><span>01</span><h3>Relative session load</h3><p>Duration × session RPE compares the size of sessions within your own week.</p></article>
-        <article><span>02</span><h3>Stress fingerprints</h3><p>Six domains keep mechanical, impact, metabolic and technical demands distinct.</p></article>
-        <article><span>03</span><h3>Goal alignment</h3><p>The session that serves Priority 1 receives protection before optional work.</p></article>
-        <article><span>04</span><h3>Progression visibility</h3><p>Repeated activity is separated from training with a measurable progression.</p></article>
-        <article><span>05</span><h3>Recovery context</h3><p>Sleep, stress, nutrition, illness and pain change the priority of a review.</p></article>
-      </section>
-
       <section className="stress-map-deliverables">
         <div>
-          <p className="stress-map-kicker stress-map-kicker--dark">Your completed map</p>
-          <h2>One primary finding.<br /><em>One first change.</em></h2>
+          <p className="stress-map-kicker">What you get</p>
+          <h2>
+            A revised week,
+            <br />
+            <em>with reasons.</em>
+          </h2>
         </div>
         <ol>
           {[
-            'Primary and secondary training priorities',
-            'A six-domain fingerprint for every session',
-            'Planned and actual session load',
-            'Same-day and adjacent-day collision flags',
-            'Sessions that compromise higher-priority work',
-            'Progression and unstructured-load analysis',
-            'A running-distance novelty warning where relevant',
-            'Protect, keep, move, modify or rotate actions',
-            'A revised seven-day structure',
-            'A printable review report',
-          ].map((item, index) => <li key={item}><span>{String(index + 1).padStart(2, '0')}</span><p>{item}</p></li>)}
+            'A complete timetable using your available times',
+            'The original and proposed time for every move',
+            'Explanations tied to your exercises and experience',
+            'A calendar file with the sessions you choose',
+          ].map((text, i) => (
+            <li key={text}>
+              <span>0{i + 1}</span>
+              <p>{text}</p>
+            </li>
+          ))}
         </ol>
       </section>
     </>
   )
 }
 
-function PriorityStep({ profile, errors, onChange }) {
-  const updateArray = (key, value, checked) => {
-    const next = new Set(profile[key] || [])
-    if (checked) next.add(value)
-    else next.delete(value)
-    onChange({ [key]: [...next] })
-  }
-
-  const updateMarker = (index, value) => {
-    const markers = [...(profile.performanceMarkers || ['', ''])]
-    markers[index] = value
-    onChange({ performanceMarkers: markers })
-  }
-
+function TimeWindows({ audit, kind, onChange }) {
+  const key = kind === 'available' ? 'availableWindows' : 'blockedWindows'
+  const windows = audit[key] || []
+  const update = (id, patch) =>
+    onChange({
+      [key]: windows.map((window) =>
+        window.id === id ? { ...window, ...patch } : window,
+      ),
+    })
+  const add = () =>
+    onChange({
+      [key]: [
+        ...windows,
+        {
+          id: uid(),
+          day: 0,
+          startTime: kind === 'available' ? '07:00' : '09:00',
+          endTime: kind === 'available' ? '08:00' : '17:00',
+          location: '',
+          equipment: [],
+          label: '',
+          kind: 'busy',
+        },
+      ],
+    })
   return (
-    <div className="stress-map-step">
-      <header className="stress-map-step__header">
-        <span>01 / 04</span>
-        <div>
-          <p>Goal hierarchy</p>
-          <h2>Decide what the week is <em>for.</em></h2>
-          <p>The audit cannot protect an important session until the programme has one clear primary outcome.</p>
-        </div>
-      </header>
-
-      <div className="stress-map-step__body">
-        <div className="stress-map-field-grid">
-          <Field label="Single most important outcome" hint="Priority 1, for the next 8 to 12 weeks" error={errors.priority1}>
-            <select value={profile.priority1} onChange={(event) => onChange({ priority1: event.target.value })} aria-invalid={Boolean(errors.priority1)}>
-              <option value="">Choose Priority 1</option>
-              {GOAL_OPTIONS.map((goal) => <option key={goal} value={goal}>{goal}</option>)}
-            </select>
-          </Field>
-          <Field label="Most important secondary outcome" hint="Must differ from Priority 1" error={errors.priority2}>
-            <select value={profile.priority2} onChange={(event) => onChange({ priority2: event.target.value })} aria-invalid={Boolean(errors.priority2)}>
-              <option value="">Choose Priority 2</option>
-              {GOAL_OPTIONS.filter((goal) => goal !== profile.priority1).map((goal) => <option key={goal} value={goal}>{goal}</option>)}
-            </select>
-          </Field>
-        </div>
-
-        <fieldset className="stress-map-toggle-field">
-          <legend>Which qualities only need to be maintained?</legend>
-          <p>Maintenance is legitimate. It should not be mistaken for a quality that must improve now.</p>
-          <div className="stress-map-toggle-grid">
-            {GOAL_OPTIONS.filter((goal) => goal !== 'Other' && goal !== profile.priority1 && goal !== profile.priority2).map((goal) => (
-              <Toggle
-                key={goal}
-                checked={(profile.maintenanceGoals || []).includes(goal)}
-                label={goal}
-                onChange={(event) => updateArray('maintenanceGoals', goal, event.target.checked)}
-              />
-            ))}
-          </div>
-        </fieldset>
-
-        <div className="stress-map-performance-markers">
-          <div>
-            <span>Measurable progress</span>
-            <h3>Which two markers would prove that the programme is working?</h3>
-            <p>Use outcomes such as a five-repetition squat, HYROX run pace, five-kilometre time or Zone 2 pace at a given heart rate.</p>
-          </div>
-          <div>
-            <Field label="Performance marker 1" error={errors.performanceMarkers}>
-              <input
-                value={profile.performanceMarkers?.[0] || ''}
-                onChange={(event) => updateMarker(0, event.target.value)}
-                placeholder="For example, HYROX run pace"
-                aria-invalid={Boolean(errors.performanceMarkers)}
-              />
-            </Field>
-            <Field label="Performance marker 2">
-              <input
-                value={profile.performanceMarkers?.[1] || ''}
-                onChange={(event) => updateMarker(1, event.target.value)}
-                placeholder="For example, five-kilometre time"
-                aria-invalid={Boolean(errors.performanceMarkers)}
-              />
-            </Field>
-          </div>
-        </div>
-
-        <div className="stress-map-field-grid">
-          <Field label="Which sessions are mainly completed for enjoyment or social reasons?" hint="These sessions remain legitimate">
-            <textarea
-              rows="4"
-              value={profile.enjoymentSessions}
-              onChange={(event) => onChange({ enjoymentSessions: event.target.value })}
-              placeholder="For example, Saturday partner WOD"
-            />
-          </Field>
-          <Field label="Which sessions are genuinely fixed?" hint="Coached, club, group or work-dependent">
-            <textarea
-              rows="4"
-              value={profile.fixedSessions}
-              onChange={(event) => onChange({ fixedSessions: event.target.value })}
-              placeholder="For example, Tuesday running group"
-            />
-          </Field>
-        </div>
-
-        <Field label="What is the first session you would remove if recovery became insufficient?" hint="If every session is mandatory, the hierarchy is not yet established">
-          <input
-            value={profile.removeFirst}
-            onChange={(event) => onChange({ removeFirst: event.target.value })}
-            placeholder="Name the first session you would reconsider"
-          />
-        </Field>
-      </div>
-    </div>
-  )
-}
-
-function ContextStep({ profile, onChange }) {
-  const activeFlags = profile.recoveryFlags?.includes('none')
-    ? []
-    : profile.recoveryFlags || []
-  const context = activeFlags.length >= 3 ? 'Limited context' : activeFlags.length === 2 ? 'Constrained context' : 'Normal context'
-
-  const toggleRecovery = (id, checked) => {
-    if (id === 'none') {
-      onChange({ recoveryFlags: checked ? ['none'] : [] })
-      return
-    }
-    const next = new Set((profile.recoveryFlags || []).filter((item) => item !== 'none'))
-    if (checked) next.add(id)
-    else next.delete(id)
-    onChange({ recoveryFlags: [...next] })
-  }
-
-  const toggleConcern = (area, checked) => {
-    const next = new Set(profile.bodyConcerns || [])
-    if (checked) next.add(area)
-    else next.delete(area)
-    onChange({ bodyConcerns: [...next] })
-  }
-
-  return (
-    <div className="stress-map-step">
-      <header className="stress-map-step__header">
-        <span>02 / 04</span>
-        <div>
-          <p>Recovery context</p>
-          <h2>Does the week fit your <em>current capacity?</em></h2>
-          <p>These answers change the priority of a review. They do not create a readiness score.</p>
-        </div>
-      </header>
-      <div className="stress-map-step__body">
-        <div className="stress-map-context-readout">
-          <div>
-            <span>Context classification</span>
-            <strong>{context}</strong>
-          </div>
-          <p>{activeFlags.length} factor{activeFlags.length === 1 ? '' : 's'} selected. The thresholds are pragmatic coaching rules, not validated cut-offs.</p>
-        </div>
-
-        <fieldset className="stress-map-toggle-field">
-          <legend>Which factors have applied during the last two weeks?</legend>
-          <div className="stress-map-toggle-grid stress-map-toggle-grid--context">
-            {RECOVERY_FLAGS.map((flag) => (
-              <Toggle
-                key={flag.id}
-                checked={(profile.recoveryFlags || []).includes(flag.id)}
-                label={flag.label}
-                onChange={(event) => toggleRecovery(flag.id, event.target.checked)}
-              />
-            ))}
-          </div>
-        </fieldset>
-
-        <fieldset className="stress-map-toggle-field">
-          <legend>Current body-area concerns</legend>
-          <p>The result will display every session that you tag with substantial exposure to a selected area.</p>
-          <div className="stress-map-toggle-grid">
-            {BODY_AREAS.map((area) => (
-              <Toggle
-                key={area}
-                checked={(profile.bodyConcerns || []).includes(area)}
-                label={area}
-                onChange={(event) => toggleConcern(area, event.target.checked)}
-              />
-            ))}
-          </div>
-        </fieldset>
-
-        {activeFlags.includes('pain-changing-training') ? (
-          <div className="stress-map-clinical-note">
-            Pain that changes movement, worsens, or produces neurological symptoms requires appropriate assessment rather than a higher score in this tool.
-          </div>
-        ) : null}
-      </div>
-    </div>
-  )
-}
-
-function SessionCard({ session, action, onEdit, onDuplicate, onRemove }) {
-  const type = getSessionType(session.type)
-  const role = getRole(session.role)
-  const plannedLoad = (Number(session.duration) || 0) * (Number(session.plannedRpe) || 0)
-  return (
-    <article className="stress-map-session-card">
+    <section className="planner-windows">
       <header>
         <div>
-          <span>{DAYS[Number(session.day)]?.short || 'Day'} · {session.startTime}</span>
-          <h3>{session.name || type.label}</h3>
+          <h3>
+            {kind === 'available'
+              ? 'When could you train?'
+              : 'When are you busy'}
+          </h3>
+          <p>
+            {kind === 'available'
+              ? 'Add alternative times you could use. Your existing session times are already included.'
+              : 'Add work, travel, sleep or other commitments that a session must fit around.'}
+          </p>
         </div>
-        <strong>{formatLoad(plannedLoad)}</strong>
+        <button
+          type="button"
+          className="stress-map-button stress-map-button--ghost"
+          onClick={add}
+        >
+          {kind === 'available' ? 'Add available time' : 'Add a commitment'}
+        </button>
       </header>
-      <div className="stress-map-session-card__meta">
-        <span>RPE {session.plannedRpe}</span>
-        <span>{session.duration} min</span>
-        <span>Alignment {role.score}</span>
-        <span>{session.progression === 'yes' ? 'Progressive' : session.progression === 'partly' ? 'Partly progressive' : 'Unstructured'}</span>
-      </div>
-      <div className="stress-map-session-card__fingerprint" aria-label="Session stress fingerprint">
-        {Object.entries(session.stress || type.stress).map(([key, score]) => (
-          <i key={key} className={`stress-level-${score}`} title={`${key}: ${score}`}>{score}</i>
-        ))}
-      </div>
-      {action ? <p className="stress-map-session-card__action">{action}</p> : null}
-      <footer>
-        <button type="button" onClick={onEdit}>Edit</button>
-        <button type="button" onClick={onDuplicate}>Duplicate</button>
-        <button type="button" onClick={onRemove}>Remove</button>
-      </footer>
-    </article>
-  )
-}
-
-function WeekStep({
-  audit,
-  analysis,
-  errors,
-  onMode,
-  onAdd,
-  onEdit,
-  onDuplicate,
-  onRemove,
-  onExample,
-}) {
-  const sorted = [...audit.sessions].sort((a, b) => Number(a.day) - Number(b.day) || String(a.startTime).localeCompare(String(b.startTime)))
-  return (
-    <div className="stress-map-step">
-      <header className="stress-map-step__header">
-        <span>03 / 04</span>
-        <div>
-          <p>Week map</p>
-          <h2>Record what the sessions <em>actually demand.</em></h2>
-          <p>Session-RPE ranks relative internal load. The fingerprint keeps different stress types separate.</p>
-        </div>
-      </header>
-      <div className="stress-map-step__body">
-        <div className="stress-map-mode-switch" role="group" aria-label="Audit mode">
-          <button
-            type="button"
-            aria-pressed={audit.mode === 'plan'}
-            className={audit.mode === 'plan' ? 'is-active' : ''}
-            onClick={() => onMode('plan')}
-          >
-            <span>Plan mode</span>
-            <small>Expected duration and session RPE</small>
-          </button>
-          <button
-            type="button"
-            aria-pressed={audit.mode === 'review'}
-            className={audit.mode === 'review' ? 'is-active' : ''}
-            onClick={() => onMode('review')}
-          >
-            <span>Review mode</span>
-            <small>Add actual load and session response</small>
-          </button>
-        </div>
-
-        <div className="stress-map-week-toolbar">
-          <div>
-            <span>{audit.sessions.length} session{audit.sessions.length === 1 ? '' : 's'} entered</span>
-            <p>Add rest days only by leaving that day empty. Every actual training session needs its own card.</p>
+      {windows.map((window, i) => (
+        <article className="planner-window" key={window.id}>
+          <div className="planner-window-heading">
+            <b>
+              {kind === 'available' ? 'Available time' : 'Commitment'} {i + 1}
+            </b>
+            <button
+              type="button"
+              className="stress-map-text-button"
+              onClick={() =>
+                onChange({
+                  [key]: windows.filter((item) => item.id !== window.id),
+                })
+              }
+            >
+              Remove
+            </button>
           </div>
-          <div>
-            <button type="button" className="stress-map-text-button stress-map-text-button--dark" onClick={onExample}>Load worked example</button>
-            <button type="button" className="stress-map-button stress-map-button--dark" onClick={onAdd}>Add session</button>
-          </div>
-        </div>
-
-        {errors.sessions ? <div className="stress-map-error-banner" role="alert">{errors.sessions}</div> : null}
-        {Object.keys(errors).some((key) => key.startsWith('session-') && key !== 'sessions') ? (
-          <div className="stress-map-error-banner" role="alert">
-            At least one session is incomplete. Open each card and review the highlighted fields.
-          </div>
-        ) : null}
-
-        {sorted.length ? (
-          <div className="stress-map-session-list">
-            {sorted.map((session) => (
-              <SessionCard
-                key={session.id}
-                session={session}
-                action={analysis.valid ? analysis.actions?.[session.id]?.label : ''}
-                onEdit={() => onEdit(session)}
-                onDuplicate={() => onDuplicate(session)}
-                onRemove={() => onRemove(session)}
+          <div className="stress-map-field-grid planner-window-fields">
+            <Field label="Day">
+              <select
+                value={window.day}
+                onChange={(e) =>
+                  update(window.id, { day: Number(e.target.value) })
+                }
+              >
+                {dayOptions(audit).map((day) => (
+                  <option value={day.value} key={day.value}>
+                    {day.label}
+                  </option>
+                ))}
+              </select>
+            </Field>
+            <Field label="From">
+              <input
+                type="time"
+                value={window.startTime}
+                onChange={(e) =>
+                  update(window.id, { startTime: e.target.value })
+                }
               />
-            ))}
+            </Field>
+            <Field label="Until">
+              <input
+                type="time"
+                value={window.endTime}
+                onChange={(e) => update(window.id, { endTime: e.target.value })}
+              />
+            </Field>
+            <Field label={kind === 'available' ? 'Place' : 'Commitment name'}>
+              {kind === 'available' ? (
+                <select
+                  value={window.location || ''}
+                  onChange={(e) =>
+                    update(window.id, { location: e.target.value })
+                  }
+                >
+                  <option value="">No specific place</option>
+                  {audit.locations.map((name) => (
+                    <option key={name}>{name}</option>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  value={window.label || ''}
+                  placeholder="For example, work or travel"
+                  onChange={(e) => update(window.id, { label: e.target.value })}
+                />
+              )}
+            </Field>
           </div>
-        ) : (
-          <div className="stress-map-week-empty">
-            <span>07</span>
-            <h3>Your week is currently empty.</h3>
-            <p>Start with the first substantial session of Monday, or load the worked HYROX example to see how the tool behaves.</p>
-            <button type="button" className="stress-map-button stress-map-button--signal" onClick={onAdd}>Add the first session</button>
-          </div>
-        )}
-
-        <div className="stress-map-load-note">
-          <strong>Why there is no weekly stress score</strong>
-          <p>A heavy squat session, interval run and hard BJJ session can produce similar session-RPE loads while creating different mechanical, metabolic and technical demands. The output ranks sessions and maps overlap. It does not collapse the week into a universal score.</p>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function ToolFooter() {
-  return (
-    <footer className="stress-map-site-footer">
-      <div>
-        <img src="/brand/logo-lockup-light.png" alt="The Performance Consultant" />
-        <p>Evidence-led online performance and nutrition coaching.</p>
-      </div>
-      <div>
-        <span>Privacy</span>
-        <p>Your map stays in this browser. This page does not transmit your training, recovery or pain information.</p>
-      </div>
-      <div>
-        <a href="/">Main website</a>
-        <a href="/blog">Blog</a>
-        <a href="mailto:will@theperformanceconsultant.net">Email</a>
-      </div>
-      <small>© {new Date().getFullYear()} The Performance Consultant</small>
-    </footer>
+          {parseClock(window.endTime) <= parseClock(window.startTime) && (
+            <p className="planner-hint">Finishes the following day.</p>
+          )}
+          {kind === 'available' && (
+            <Field
+              label="Equipment available"
+              hint="Separate items with commas. For example: barbell, rower."
+            >
+              <input
+                value={(window.equipment || []).join(', ')}
+                onChange={(e) =>
+                  update(window.id, {
+                    equipment: e.target.value
+                      .split(',')
+                      .map((value) => value.trim()),
+                  })
+                }
+                onBlur={() =>
+                  update(window.id, {
+                    equipment: (window.equipment || []).filter(Boolean),
+                  })
+                }
+              />
+            </Field>
+          )}
+          {window.sessionIds?.length > 0 && (
+            <p className="planner-hint">
+              Saved availability for{' '}
+              {window.sessionIds
+                .map((id) => {
+                  const session = audit.sessions.find((s) => s.id === id)
+                  return session
+                    ? `${session.name} on ${dayLabel(audit, session.day)} at ${session.startTime}`
+                    : 'a previous session'
+                })
+                .join(', ')}
+              .{' '}
+              <button
+                type="button"
+                className="stress-map-text-button"
+                onClick={() => update(window.id, { sessionIds: undefined })}
+              >
+                Make this time available for any session
+              </button>
+            </p>
+          )}
+          {(audit.weekMode === 'typical' || window.day < 6) && (
+            <button
+              className="stress-map-text-button"
+              type="button"
+              onClick={() =>
+                onChange({
+                  [key]: [
+                    ...windows,
+                    {
+                      ...structuredClone(window),
+                      id: uid(),
+                      day: (window.day + 1) % 7,
+                    },
+                  ],
+                })
+              }
+            >
+              Copy to the next day
+              <Arrow />
+            </button>
+          )}
+        </article>
+      ))}
+      {!windows.length && (
+        <p className="planner-empty-note">
+          {kind === 'available'
+            ? 'No alternative times added yet.'
+            : 'No commitments added yet.'}
+        </p>
+      )}
+    </section>
   )
 }
 
 export default function HybridStressMap() {
-  const [audit, setAudit] = useState(cloneEmptyAudit)
+  const [audit, setAudit] = useState(newPlanningAudit)
   const [started, setStarted] = useState(false)
   const [hydrated, setHydrated] = useState(false)
-  const [hasSavedMap, setHasSavedMap] = useState(false)
-  const [storageAvailable, setStorageAvailable] = useState(true)
-  const [stepErrors, setStepErrors] = useState({})
+  const [choices, setChoices] = useState([])
+  const [saveState, setSaveState] = useState('')
+  const [loadErrors, setLoadErrors] = useState([])
+  const [example, setExample] = useState(false)
+  const personalRef = useRef(null)
   const [editor, setEditor] = useState(null)
-  const [editorIsNew, setEditorIsNew] = useState(false)
+  const [editorBase, setEditorBase] = useState(null)
+  const [showSaved, setShowSaved] = useState(false)
+  const [errors, setErrors] = useState([])
+  const [planState, setPlanState] = useState({ status: 'idle', result: null })
   const toolRef = useRef(null)
-  const reduceMotion = useReducedMotion()
-  const analysis = useMemo(() => analyseWeek(audit), [audit])
+  const saveEnabled = useRef(false)
 
   useEffect(() => {
-    let stored = null
     try {
-      stored = window.localStorage.getItem(STORAGE_KEY)
-    } catch {
-      setStorageAvailable(false)
-      setHydrated(true)
-      return
-    }
-
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored)
-        if (parsed?.schemaVersion === SCHEMA_VERSION && parsed.profile && Array.isArray(parsed.sessions)) {
-          setAudit(parsed)
-          setHasSavedMap(parsed.sessions.length > 0 || Boolean(parsed.profile.priority1))
-        }
-      } catch {
-        try {
-          window.localStorage.removeItem(STORAGE_KEY)
-        } catch {
-          setStorageAvailable(false)
-        }
+      const saved = loadSavedAudits(window.localStorage)
+      setChoices(saved.choices)
+      setLoadErrors(saved.errors || [])
+      const current =
+        saved.choices.find((choice) => choice.key === PLANNING_STORAGE_KEY) ||
+        (saved.choices.length === 1 ? saved.choices[0] : null)
+      if (current) {
+        setAudit(current.audit)
+        saveEnabled.current = true
+      } else if (!saved.choices.length) saveEnabled.current = true
+      const params = new URLSearchParams(window.location.search)
+      if (params.get('example') === 'athx') {
+        personalRef.current = current?.audit || null
+        const sample = workedExample()
+        const requestedStep = Number(params.get('step'))
+        sample.currentStep = [0, 1, 2].includes(requestedStep)
+          ? requestedStep
+          : 0
+        setAudit(sample)
+        setExample(true)
+        setStarted(true)
       }
+    } catch (error) {
+      setLoadErrors([error.message || 'Saved weeks could not be loaded.'])
     }
     setHydrated(true)
   }, [])
 
   useEffect(() => {
-    if (!hydrated) return
-    const next = { ...audit, updatedAt: new Date().toISOString() }
-    setHasSavedMap(next.sessions.length > 0 || Boolean(next.profile.priority1))
+    if (!hydrated || example || !saveEnabled.current) return
     try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
-      setStorageAvailable(true)
+      savePlanningAudit(audit, window.localStorage)
+      setSaveState('Saved on this device')
+      setChoices(loadSavedAudits(window.localStorage).choices)
     } catch {
-      setStorageAvailable(false)
+      setSaveState(
+        'Saving is unavailable in this browser. Keep this tab open and download your calendar before leaving.',
+      )
     }
-  }, [audit, hydrated])
+  }, [audit, hydrated, example])
 
-  const scrollToTool = useCallback(() => {
-    requestAnimationFrame(() => toolRef.current?.scrollIntoView({
-      behavior: reduceMotion ? 'auto' : 'smooth',
-      block: 'start',
-    }))
-  }, [reduceMotion])
+  useEffect(() => {
+    if (audit.currentStep !== 2 || !started || !audit.sessions.length) return
+    setPlanState({ status: 'loading', result: null })
+    let worker
+    try {
+      worker = new Worker(new URL('./planner.worker.js', import.meta.url), {
+        type: 'module',
+      })
+      worker.onmessage = ({ data }) =>
+        setPlanState(
+          data.error
+            ? { status: 'error', error: data.error }
+            : { status: 'ready', result: data.result },
+        )
+      worker.onerror = () =>
+        setPlanState({
+          status: 'error',
+          error:
+            'The timetable could not be checked. Check the save status above before reloading this page to try again.',
+        })
+      worker.postMessage(audit)
+    } catch {
+      setPlanState({
+        status: 'error',
+        error:
+          'This browser could not start the timetable comparison. Your entries are still shown here. Check the save status before updating or reloading this browser.',
+      })
+    }
+    return () => worker?.terminate()
+  }, [audit, started])
 
+  const scrollToTool = () =>
+    requestAnimationFrame(() =>
+      toolRef.current?.scrollIntoView({ behavior: 'instant', block: 'start' }),
+    )
   const start = () => {
     setStarted(true)
     scrollToTool()
   }
-
-  const setCurrentStep = (currentStep) => {
+  const go = (currentStep) => {
+    const issues = []
+    if (currentStep > 0) {
+      if (!audit.sessions.length)
+        issues.push('Add at least one training session.')
+      const date = new Date(`${audit.weekStart}T00:00:00Z`)
+      if (
+        audit.weekMode === 'specific' &&
+        (!/^\d{4}-\d{2}-\d{2}$/.test(audit.weekStart || '') ||
+          !Number.isFinite(date.getTime()) ||
+          date.toISOString().slice(0, 10) !== audit.weekStart)
+      )
+        issues.push('Choose the first date of your training week.')
+    }
+    if (currentStep === 2) {
+      for (const window of [...audit.availableWindows, ...audit.blockedWindows])
+        if (
+          !Number.isFinite(parseClock(window.startTime)) ||
+          !Number.isFinite(parseClock(window.endTime))
+        )
+          issues.push('Complete the start and finish time for each time slot.')
+    }
+    if (issues.length) {
+      setErrors([...new Set(issues)])
+      return
+    }
     setAudit((current) => ({ ...current, currentStep }))
-    setStepErrors({})
+    setErrors([])
     setStarted(true)
     scrollToTool()
   }
-
-  const updateProfile = (patch) => {
-    setAudit((current) => ({ ...current, profile: { ...current.profile, ...patch } }))
-    setStepErrors({})
+  const change = (patch) => {
+    setAudit((current) => ({ ...current, ...patch, acceptedPlan: null }))
+    setErrors([])
   }
-
-  const loadExample = () => {
-    if (hasSavedMap && !window.confirm('Replace the current map with the worked HYROX example? Your current entries will be removed from this browser.')) return
-    setAudit(structuredClone(HYROX_EXAMPLE))
-    setStepErrors({})
+  const onExample = () => {
+    if (!example) personalRef.current = audit
+    setAudit(workedExample())
+    setExample(true)
     setStarted(true)
+    setErrors([])
     scrollToTool()
   }
-
-  const nextFromPriorities = () => {
-    const errors = {}
-    if (!audit.profile.priority1) errors.priority1 = 'Choose one primary outcome.'
-    if (!audit.profile.priority2) errors.priority2 = 'Choose one secondary outcome.'
-    if (audit.profile.priority1 && audit.profile.priority1 === audit.profile.priority2) {
-      errors.priority2 = 'Priority 2 must differ from Priority 1.'
-    }
-    if (!audit.profile.performanceMarkers?.[0]?.trim() || !audit.profile.performanceMarkers?.[1]?.trim()) {
-      errors.performanceMarkers = 'Enter two performance markers.'
-    }
-    setStepErrors(errors)
-    if (!Object.keys(errors).length) setCurrentStep(1)
+  const leaveExample = () => {
+    setAudit(personalRef.current || newPlanningAudit())
+    setExample(false)
+    setErrors([])
+    scrollToTool()
   }
-
-  const openNewSession = () => {
-    setEditor(newSession({
-      id: uniqueId(),
-      type: 'custom',
-      name: '',
-      fingerprintConfirmed: false,
-    }))
-    setEditorIsNew(true)
+  const addLocation = (name) => {
+    const clean = name.trim()
+    if (clean)
+      setAudit((current) => ({
+        ...current,
+        locations: [...new Set([...current.locations, clean])],
+      }))
   }
-
-  const openSession = (session) => {
+  const openNew = (multipart = false) => {
+    setEditorBase(null)
+    setEditor(newPlanningSession(multipart ? { components: [newPart()] } : {}))
+  }
+  const edit = (session, baseSessions = null) => {
+    setEditorBase(baseSessions)
     setEditor(structuredClone(session))
-    setEditorIsNew(false)
   }
-
   const saveSession = () => {
-    setAudit((current) => ({
-      ...current,
-      sessions: editorIsNew
-        ? [...current.sessions, editor]
-        : current.sessions.map((session) => session.id === editor.id ? editor : session),
-    }))
+    const item = { ...editor, duration: bookingDuration(editor) }
+    const base = editorBase || audit.sessions
+    change({
+      sessions: base.some((s) => s.id === item.id)
+        ? base.map((s) => (s.id === item.id ? item : s))
+        : [...base, item],
+    })
     setEditor(null)
-    setEditorIsNew(false)
-    setStepErrors({})
+    setEditorBase(null)
   }
-
-  const duplicateSession = (session) => {
+  const remove = (session) => {
+    if (
+      window.confirm(
+        `Remove “${session.name}” on ${dayLabel(audit, session.day)} at ${session.startTime} from this week?`,
+      )
+    ) {
+      const responses = Object.fromEntries(
+        Object.entries(audit.pairResponses).filter(
+          ([key]) => !key.split('->').includes(session.id),
+        ),
+      )
+      change({
+        sessions: audit.sessions.filter((s) => s.id !== session.id),
+        pairResponses: responses,
+      })
+    }
+  }
+  const copy = (session) => {
     const duplicate = {
       ...structuredClone(session),
-      id: uniqueId(),
+      id: uid(),
       name: `${session.name} copy`,
+      components: (session.components || []).map((part) => ({
+        ...part,
+        id: uid(),
+      })),
     }
-    setAudit((current) => ({ ...current, sessions: [...current.sessions, duplicate] }))
+    change({ sessions: [...audit.sessions, duplicate] })
+    setEditorBase(null)
+    setEditor(duplicate)
   }
-
-  const removeSession = (session) => {
-    if (!window.confirm(`Remove ${session.name || 'this session'} from the map?`)) return
-    setAudit((current) => ({ ...current, sessions: current.sessions.filter((item) => item.id !== session.id) }))
-  }
-
-  const calculate = () => {
-    const validation = validateAudit(audit)
-    setStepErrors(validation.errors)
-    if (!validation.valid) return
-    setCurrentStep(3)
-  }
-
-  const reset = () => {
-    if (!window.confirm('Start a new map? The current entries saved in this browser will be removed.')) return
-    try {
-      window.localStorage.removeItem(STORAGE_KEY)
-    } catch {
-      setStorageAvailable(false)
+  const next = () => go(Math.min(2, audit.currentStep + 1))
+  const answer = (sourceId, targetId, value) => {
+    const context = pairContext(audit, sourceId, targetId)
+    if (!Number.isFinite(context?.gapMinutes)) {
+      setErrors(['Choose the earlier session first.'])
+      return
     }
-    setAudit(cloneEmptyAudit())
-    setHasSavedMap(false)
-    setStarted(false)
-    setStepErrors({})
-    window.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' })
-  }
-
-  const renderStep = () => {
-    if (audit.currentStep === 0) return <PriorityStep profile={audit.profile} errors={stepErrors} onChange={updateProfile} />
-    if (audit.currentStep === 1) return <ContextStep profile={audit.profile} onChange={updateProfile} />
-    if (audit.currentStep === 2) {
-      return (
-        <WeekStep
-          audit={audit}
-          analysis={analysis}
-          errors={stepErrors}
-          onMode={(mode) => setAudit((current) => ({ ...current, mode }))}
-          onAdd={openNewSession}
-          onEdit={openSession}
-          onDuplicate={duplicateSession}
-          onRemove={removeSession}
-          onExample={loadExample}
-        />
-      )
-    }
-    return analysis.valid ? (
-      <StressMapResults
-        analysis={analysis}
-        onEdit={() => setCurrentStep(2)}
-        onReviewMode={() => {
-          setAudit((current) => ({ ...current, mode: 'review', currentStep: 2 }))
-          setStarted(true)
-          scrollToTool()
-        }}
-        onReset={reset}
-      />
-    ) : (
-      <div className="stress-map-error-state" role="alert">
-        <h2>The map needs more information.</h2>
-        <p>Return to the week and complete the required session details before calculating the result.</p>
-        <button type="button" className="stress-map-button stress-map-button--dark" onClick={() => setCurrentStep(2)}>Review the week</button>
-      </div>
-    )
+    change({
+      pairResponses: {
+        ...audit.pairResponses,
+        [`${sourceId}->${targetId}`]: {
+          answer: value,
+          context,
+          answeredAt: new Date().toISOString(),
+        },
+      },
+    })
   }
 
   return (
     <div className="stress-map" id="top">
-      <StressMapHeader
-        started={started}
-        currentStep={audit.currentStep}
-        onSelectStep={setCurrentStep}
-        onStart={start}
-      />
+      <header className="stress-map-header">
+        <a href="/" className="stress-map-header__brand">
+          <img src="/brand/logo-lockup.png" alt="The Performance Consultant" />
+        </a>
+        <p>Training Week Stress Map</p>
+        <button className="stress-map-header__action" onClick={start}>
+          {started ? 'Continue' : 'Start your map'}
+          <Arrow />
+        </button>
+      </header>
       <main>
-        <Landing hasSavedMap={hasSavedMap} onStart={start} onExample={loadExample} />
-
-        <section className={`stress-map-tool-shell ${started ? 'is-started' : ''}`} ref={toolRef} id="stress-map-tool">
+        {!started && (
+          <Landing
+            hasSaved={Boolean(choices.length)}
+            onStart={start}
+            onExample={onExample}
+          />
+        )}
+        <section
+          className="stress-map-tool-shell"
+          ref={toolRef}
+          id="stress-map-tool"
+        >
           {!started ? (
             <div className="stress-map-tool-gate">
-              <p className="stress-map-kicker">Your week, interpreted in context</p>
-              <h2>Ready to map the <em>actual programme?</em></h2>
-              <p>You will need the normal training week, approximate session durations and an honest estimate of overall session RPE.</p>
-              <button type="button" className="stress-map-button stress-map-button--signal stress-map-button--large" onClick={start}>Begin the audit</button>
-              <small>No account. No email gate. Data stays on this device.</small>
+              <p className="stress-map-kicker">Your training week</p>
+              <h2>
+                Start with <em>your sessions.</em>
+              </h2>
+              <button
+                className="stress-map-button stress-map-button--dark"
+                onClick={start}
+              >
+                Build my timetable
+                <Arrow />
+              </button>
             </div>
           ) : (
             <>
-              <div className="stress-map-tool-progress">
-                <StepNav current={audit.currentStep} onSelect={setCurrentStep} />
-                <span aria-live="polite">
-                  {storageAvailable ? 'Saved locally' : 'Local saving unavailable'}
-                </span>
-              </div>
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={audit.currentStep}
-                  initial={reduceMotion ? false : { opacity: 0, y: 18 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -12 }}
-                  transition={{ duration: reduceMotion ? 0 : 0.32 }}
-                >
-                  {renderStep()}
-                </motion.div>
-              </AnimatePresence>
-
-              {audit.currentStep < 3 ? (
-                <div className="stress-map-step-actions">
+              {example && (
+                <div className="planner-example-banner">
+                  <div>
+                    <strong>Worked ATHX example</strong>
+                    <p>
+                      Edit these representative sessions to explore the tool.
+                      Your saved week is kept separately.
+                    </p>
+                  </div>
                   <button
                     type="button"
                     className="stress-map-button stress-map-button--ghost"
-                    onClick={() => audit.currentStep > 0 ? setCurrentStep(audit.currentStep - 1) : reset()}
+                    onClick={leaveExample}
                   >
-                    {audit.currentStep > 0 ? 'Previous step' : 'Start again'}
+                    Return to my week
                   </button>
-                  {audit.currentStep === 0 ? (
-                    <button type="button" className="stress-map-button stress-map-button--signal" onClick={nextFromPriorities}>Continue to context</button>
-                  ) : audit.currentStep === 1 ? (
-                    <button type="button" className="stress-map-button stress-map-button--signal" onClick={() => setCurrentStep(2)}>Build the week</button>
-                  ) : (
-                    <button type="button" className="stress-map-button stress-map-button--signal" onClick={calculate}>Calculate my Stress Map</button>
-                  )}
                 </div>
-              ) : null}
+              )}
+              {!!loadErrors.length && (
+                <div className="planner-alert" role="status">
+                  {loadErrors.map((error, i) => (
+                    <p key={i}>
+                      {typeof error === 'string' ? error : error.message}
+                    </p>
+                  ))}
+                </div>
+              )}
+              {choices.length > 1 &&
+              (!saveEnabled.current || showSaved) &&
+              !example ? (
+                <section className="planner-saved-choices">
+                  <h2>Choose a saved week</h2>
+                  <p>
+                    Choose a week to open. Your other saved weeks will be kept.
+                  </p>
+                  {choices.map((choice) => (
+                    <button
+                      className="planner-saved-choice"
+                      key={choice.key}
+                      onClick={() => {
+                        saveEnabled.current = true
+                        setAudit(choice.audit)
+                        setShowSaved(false)
+                      }}
+                    >
+                      <strong>{choice.label}</strong>
+                      <span>
+                        {choice.sessionCount} sessions
+                        {choice.updatedAt
+                          ? ` · ${new Date(choice.updatedAt).toLocaleDateString('en-GB')}`
+                          : ''}
+                      </span>
+                      <Arrow />
+                    </button>
+                  ))}
+                </section>
+              ) : (
+                <>
+                  <div className="stress-map-tool-progress">
+                    <nav
+                      className="stress-map-step-nav"
+                      aria-label="Map progress"
+                    >
+                      {STEPS.map((label, i) => (
+                        <button
+                          key={label}
+                          type="button"
+                          className={
+                            audit.currentStep === i ? 'is-current' : ''
+                          }
+                          aria-current={
+                            audit.currentStep === i ? 'step' : undefined
+                          }
+                          onClick={() => go(i)}
+                        >
+                          <span>0{i + 1}</span>
+                          <b>{label}</b>
+                        </button>
+                      ))}
+                    </nav>
+                    {!example && (
+                      <div>
+                        <small role="status">{saveState}</small>
+                        <button
+                          type="button"
+                          className="stress-map-text-button planner-open-saved"
+                          onClick={() => {
+                            setAudit(newPlanningAudit())
+                            setErrors([])
+                          }}
+                        >
+                          Start a new week
+                        </button>
+                        {choices.length > 1 && (
+                          <button
+                            type="button"
+                            className="stress-map-text-button planner-open-saved"
+                            onClick={() => {
+                              const saved = loadSavedAudits(window.localStorage)
+                              setChoices(saved.choices)
+                              setLoadErrors(saved.errors)
+                              setShowSaved(true)
+                            }}
+                          >
+                            Open another saved week
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  {errors.length > 0 && (
+                    <div className="planner-alert" role="alert">
+                      {errors.map((message) => (
+                        <p key={message}>{message}</p>
+                      ))}
+                    </div>
+                  )}
+                  {audit.currentStep === 0 && (
+                    <div className="stress-map-step">
+                      <header className="stress-map-step__header">
+                        <span>01 / 03</span>
+                        <div>
+                          <p>Your sessions</p>
+                          <h2>
+                            What does your <em>week include?</em>
+                          </h2>
+                          <p>
+                            Add each session and select every priority. A
+                            priority session can still move if its timing is
+                            flexible.
+                          </p>
+                        </div>
+                      </header>
+                      <div className="stress-map-field-grid">
+                        <Field label="Which week are you planning?">
+                          <select
+                            value={audit.weekMode}
+                            onChange={(e) =>
+                              change({
+                                weekMode: e.target.value,
+                                weekStart: '',
+                              })
+                            }
+                          >
+                            <option value="specific">
+                              A specific training week
+                            </option>
+                            <option value="typical">
+                              My typical training week
+                            </option>
+                          </select>
+                        </Field>
+                        {audit.weekMode === 'specific' && (
+                          <Field label="First day of this training week">
+                            <input
+                              type="date"
+                              value={audit.weekStart}
+                              onChange={(e) =>
+                                change({ weekStart: e.target.value })
+                              }
+                            />
+                          </Field>
+                        )}
+                        <Field label="Main training goal" hint="Optional">
+                          <select
+                            value={audit.profile.priority1}
+                            onChange={(e) =>
+                              change({
+                                profile: {
+                                  ...audit.profile,
+                                  priority1: e.target.value,
+                                },
+                              })
+                            }
+                          >
+                            <option value="">Choose a goal</option>
+                            {[
+                              ...new Set(['ATHX performance', ...GOAL_OPTIONS]),
+                            ].map((goal) => (
+                              <option key={goal}>{goal}</option>
+                            ))}
+                          </select>
+                        </Field>
+                      </div>
+                      <div className="planner-add-row">
+                        <button
+                          className="stress-map-button stress-map-button--dark"
+                          onClick={() => openNew()}
+                        >
+                          Add a session
+                          <Arrow />
+                        </button>
+                        <button
+                          className="stress-map-button stress-map-button--ghost"
+                          onClick={() => openNew(true)}
+                        >
+                          Add a session with separate parts
+                          <Arrow />
+                        </button>
+                        {!audit.sessions.length && (
+                          <button
+                            className="stress-map-text-button"
+                            onClick={onExample}
+                          >
+                            Explore the ATHX example
+                          </button>
+                        )}
+                      </div>
+                      {!audit.sessions.length ? (
+                        <div className="planner-empty">
+                          <h3>Add the sessions you want to keep.</h3>
+                          <p>
+                            Use specific names so you can recognise them later.
+                            For example, “Deadlifts and split squats” or “6 ×
+                            3-minute run intervals”.
+                          </p>
+                        </div>
+                      ) : (
+                        <WeekCalendar
+                          audit={audit}
+                          onEdit={edit}
+                          onDuplicate={copy}
+                          onRemove={remove}
+                        />
+                      )}
+                      {!!audit.sessions.length && (
+                        <p className="planner-hint">
+                          Select a session name to edit its details.
+                        </p>
+                      )}
+                    </div>
+                  )}
+                  {audit.currentStep === 1 && (
+                    <div className="stress-map-step">
+                      <header className="stress-map-step__header">
+                        <span>02 / 03</span>
+                        <div>
+                          <p>Your available time</p>
+                          <h2>
+                            Where could sessions <em>move?</em>
+                          </h2>
+                          <p>
+                            Add times you could use and commitments to keep
+                            clear. Select the same place from the list for a
+                            session and its available time.
+                          </p>
+                        </div>
+                      </header>
+                      <Field label="Time zone">
+                        <select
+                          value={audit.timeZone}
+                          onChange={(e) => change({ timeZone: e.target.value })}
+                        >
+                          {[
+                            ...new Set([
+                              audit.timeZone,
+                              'Europe/London',
+                              ...(Intl.supportedValuesOf?.('timeZone') || []),
+                            ]),
+                          ]
+                            .filter(Boolean)
+                            .map((zone) => (
+                              <option key={zone}>{zone}</option>
+                            ))}
+                        </select>
+                      </Field>
+                      {audit.profile.fixedSessions && (
+                        <details className="stress-map-details">
+                          <summary>Earlier notes about fixed sessions</summary>
+                          <p>{audit.profile.fixedSessions}</p>
+                          <p>
+                            For training bookings, open Training sessions and
+                            set the day and time to fixed. Add other commitments
+                            below.
+                          </p>
+                        </details>
+                      )}
+                      <TimeWindows
+                        audit={audit}
+                        kind="available"
+                        onChange={change}
+                      />
+                      <TimeWindows
+                        audit={audit}
+                        kind="blocked"
+                        onChange={change}
+                      />
+                    </div>
+                  )}
+                  {audit.currentStep === 2 && (
+                    <div className="stress-map-step">
+                      {planState.status === 'loading' && (
+                        <div className="planner-loading" role="status">
+                          <span />
+                          <h2>Comparing your available times</h2>
+                          <p>
+                            Checking the complete week, including sessions that
+                            stay in place.
+                          </p>
+                        </div>
+                      )}
+                      {planState.status === 'error' && (
+                        <div className="planner-alert" role="alert">
+                          <p>{planState.error}</p>
+                          <button
+                            className="stress-map-button stress-map-button--ghost"
+                            onClick={() => go(1)}
+                          >
+                            Review available time
+                          </button>
+                        </div>
+                      )}
+                      {planState.result && (
+                        <StressMapResults
+                          audit={audit}
+                          plan={planState.result}
+                          onAnswer={answer}
+                          onEdit={edit}
+                          onEditAvailability={() => go(1)}
+                          onEditSessions={() => go(0)}
+                          onAccept={(plan) =>
+                            setAudit((current) => ({
+                              ...current,
+                              acceptedPlan: structuredClone(plan),
+                            }))
+                          }
+                          onUndo={() =>
+                            setAudit((current) => ({
+                              ...current,
+                              acceptedPlan: null,
+                            }))
+                          }
+                          onChange={change}
+                        />
+                      )}
+                    </div>
+                  )}
+                  {audit.currentStep < 2 && (
+                    <div className="stress-map-step-actions">
+                      <button
+                        className="stress-map-button stress-map-button--ghost"
+                        onClick={() =>
+                          audit.currentStep ? go(0) : setStarted(false)
+                        }
+                      >
+                        <Arrow back />
+                        {audit.currentStep
+                          ? 'Training sessions'
+                          : 'Introduction'}
+                      </button>
+                      <button
+                        className="stress-map-button stress-map-button--signal"
+                        onClick={next}
+                      >
+                        {audit.currentStep
+                          ? 'Show my proposed week'
+                          : 'Add available time'}
+                        <Arrow />
+                      </button>
+                    </div>
+                  )}
+                </>
+              )}
             </>
           )}
         </section>
       </main>
-      <ToolFooter />
+      <footer className="stress-map-site-footer">
+        <div>
+          <img
+            src="/brand/logo-lockup-light.png"
+            alt="The Performance Consultant"
+          />
+          <p>Training and nutrition coaching.</p>
+        </div>
+        <div>
+          <a href="/">Main website</a>
+          <a href="/blog">Blog</a>
+        </div>
+        <small>© {new Date().getFullYear()} The Performance Consultant</small>
+      </footer>
       <SessionEditor
         session={editor}
-        mode={audit.mode}
         onChange={setEditor}
-        onClose={() => {
-          setEditor(null)
-          setEditorIsNew(false)
-        }}
         onSave={saveSession}
+        onClose={() => setEditor(null)}
+        locations={audit.locations}
+        onAddLocation={addLocation}
+        dayOptions={dayOptions(audit)}
+        audit={audit}
+        editingNote={
+          editorBase
+            ? 'Editing the proposed timetable. Saving this edit makes it your current week.'
+            : ''
+        }
       />
     </div>
   )

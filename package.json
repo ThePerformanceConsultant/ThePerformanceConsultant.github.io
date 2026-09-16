@@ -12,7 +12,8 @@
     "dev": "vite",
     "prebuild": "npm run content:sync",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:stress-map": "node --test src/lead-magnets/hybrid-stress-map/*.test.js"
   },
   "dependencies": {
     "@fontsource-variable/manrope": "5.2.8",
@@ -24,6 +25,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-react": "latest",
+    "ical.js": "^2.2.1",
     "vite": "latest"
   }
 }
