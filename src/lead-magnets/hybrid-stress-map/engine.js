@@ -1062,7 +1062,7 @@ function coachingRoute({ status, recovery, collisions, progression }) {
   if (structureIssue && nutritionContext) {
     return {
       name: 'Rx+',
-      price: '£250 per month',
+      price: '£299 per month',
       label: 'Integrated training and nutrition',
       reason: 'The map identifies programming decisions alongside nutrition or recovery constraints that need managing together.',
     }
@@ -1070,7 +1070,7 @@ function coachingRoute({ status, recovery, collisions, progression }) {
   if (structureIssue) {
     return {
       name: 'Rx',
-      price: '£149 per month',
+      price: '£165 per month',
       label: 'Training Focus',
       reason: 'The main issue is session structure, progression, sequencing or coordination across disciplines.',
     }
@@ -1078,7 +1078,7 @@ function coachingRoute({ status, recovery, collisions, progression }) {
   if (nutritionContext) {
     return {
       name: 'Rx',
-      price: '£149 per month',
+      price: '£165 per month',
       label: 'Nutrition Focus',
       reason: 'The week is broadly coherent, while fuelling, recovery or lifestyle context deserves closer interpretation.',
     }

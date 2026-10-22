@@ -31,14 +31,14 @@ export const plans = [
     layout: 'focuses',
     tone: 'light',
     name: 'Rx',
-    price: '149',
+    price: '165',
     label: 'One primary discipline',
     focuses: [
       {
         id: 'nutrition',
         name: 'Nutrition Focus',
         intro: 'For athletes who want nutrition prescribed and reviewed in detail while retaining control of their own training.',
-        applicationValue: 'Rx - Nutrition Focus, £149 per month',
+        applicationValue: 'Rx - Nutrition Focus, £165 per month',
         coreFeatures: [
           'Nutrition plan built to your training, lifestyle and biofeedback',
           'Sustainable fuelling that you enjoy, that supports performance, body composition, or both',
@@ -55,7 +55,7 @@ export const plans = [
         id: 'training',
         name: 'Training Focus',
         intro: 'For athletes who want training prescribed and reviewed in detail, with practical nutrition support around the programme.',
-        applicationValue: 'Rx - Training Focus, £149 per month',
+        applicationValue: 'Rx - Training Focus, £165 per month',
         coreFeatures: [
           'Training built around your goals, schedule and wider lifestyle',
           'Carefully periodised to support sustainable, long-term progression',
@@ -77,10 +77,10 @@ export const plans = [
     layout: 'integrated',
     tone: 'dark',
     name: 'Rx+',
-    price: '250',
+    price: '299',
     label: 'Integrated coaching',
     intro: 'For athletes who need training and nutrition prescribed as one system, with closer access, detailed review and broader performance management.',
-    applicationValue: 'Rx+ - Integrated Training and Nutrition, £250 per month',
+    applicationValue: 'Rx+ - Integrated Training and Nutrition, £299 per month',
     features: [
       'The complete Rx Nutrition and Rx Training standards, fully integrated',
       'Fully bespoke, periodised programming tailored to your goals, lifestyle and competition demands',

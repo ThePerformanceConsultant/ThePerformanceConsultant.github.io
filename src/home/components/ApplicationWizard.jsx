@@ -207,9 +207,9 @@ export function ApplicationWizard({ open, onClose, initialPlan = '' }) {
           <p className="application__step-copy">If you are unsure, select guidance. The appropriate service can be discussed after review.</p>
           <div className="application__fields application__fields--two">
             <SelectField label="Preferred service" name="plan" value={values.plan} onChange={change}>
-              <option>Rx - Nutrition Focus, £149 per month</option>
-              <option>Rx - Training Focus, £149 per month</option>
-              <option>Rx+ - Integrated Training and Nutrition, £249 per month</option>
+              <option>Rx - Nutrition Focus, £165 per month</option>
+              <option>Rx - Training Focus, £165 per month</option>
+              <option>Rx+ - Integrated Training and Nutrition, £299 per month</option>
               <option>Unsure, I would like guidance</option>
             </SelectField>
             <SelectField label="Preferred start" name="start" value={values.start} onChange={change}>
@@ -245,7 +245,7 @@ export function ApplicationWizard({ open, onClose, initialPlan = '' }) {
         <div className="application__consents">
           <label className="check-field">
             <input type="checkbox" name="investment" checked={values.investment} onChange={change} required />
-            <span>I understand that Rx - Nutrition Focus and Rx - Training Focus each cost £149 per month, and Rx+ costs £250 per month.</span>
+            <span>I understand that Rx - Nutrition Focus and Rx - Training Focus each cost £165 per month, and Rx+ costs £299 per month.</span>
           </label>
           <label className="check-field">
             <input type="checkbox" name="privacy" checked={values.privacy} onChange={change} required />
